@@ -515,7 +515,7 @@ var COPY = {
     letterParagraphs: [
       "You are essential part of our work! You will help build a dataset of human emotions that researchers will use to improve the emotional awareness of AI models. This should only take 5 minutes. Ready?",
     ],
-    continueBtn: "Continue →",
+    continueBtn: "Continue",
   },
 
   home: {
@@ -523,9 +523,9 @@ var COPY = {
     title: "The Emotion Project",
     subtitle: "The goal is to create a high-quality dataset of tweets associated with emotions being expressed by writers. When you're ready to start annotating, hit classify below.",
     sampleTweetText: "i am now nearly finished the week detox and i feel amazing",
-    startBtn: "Classify →",
+    startBtn: "Classify",
     resumeTemplate: "You have an unfinished session as <b>{name}</b> ({progress}/5 done).",
-    resumeBtn: "Resume →",
+    resumeBtn: "Resume",
   },
 
   idScreen: {
@@ -534,39 +534,39 @@ var COPY = {
     label: "Your name or username",
     placeholder: "e.g. annotator_07",
     hint: "You name or username will be stored along iwth your your labels.",
-    continueBtn: "Continue →",
+    continueBtn: "Continue",
   },
 
   tutorial: {
-    backBtn: "← Back",
-    nextBtn: "Next →",
-    lastStepBtn: "Try a practice tweet →",
+    backBtn: "Back",
+    nextBtn: "Next",
+    lastStepBtn: "Next",
     exampleLabel: "Example",
     steps: [
       { heading: "Goal", paragraphs: [
-          "You'll be annotating tweets with the one emotion you think the writer is <em>most</em> expressing. Your choices for emotions are:: <b>anger, fear, joy, love, sadness,</b> and <b>surprise</b>.",
+          "You'll be annotating tweets with the one emotion you think the writer is <em>most</em> expressing. Your choices for emotions are: <b>anger, fear, joy, love, sadness,</b> and <b>surprise</b>.",
       ]},
       { heading: "Task", paragraphs: [
           "You'll be shown a tweet and asked which emotion the writer is <b>most</b> expressing. As a reminder, the options are <b>anger, fear, joy, love, sadness,</b> and <b>surprise</b>. There will also be two more options for special cases which we'll go over soon.",
       ]},
       { heading: "Defining Emotions", intro: "This is how each emotion is defined." },
       { heading: "Special Case: cannot choose",
-        intro: "You might see a tweet where multiple emotions are expressed at once. For example:",
+        intro: "You might see a tweet where multiple emotions are expressed at once.",
         exampleText: "omg i cannot believe you flew all threw me a surprise birthday part. i love you so much",
         exampleCats: ["love","surprise"],
-        outro: "The key is to mark the <b>one</b> emotion that you think the writer is showing. In this case, Love would be selected because the surprise is really just in detail in the writer expressing their love for someone. If you really can't choose between multiple emotions, select <b>\"Cannot choose\"</b>.",
+        outro: "The key is to choose the <b>one</b> emotion that you think the writer is most expressing. In this case, Love would be selected because the surprise is really just a detail being used so the writer show their love for someone. however, if you really can't choose you can select <b>\"Cannot choose\"</b>. This button should only be selected for truly hard situations! Please try to choose an emotion as often as possible.",
       },
       { heading: "Special Case: no emotion",
         intro: "Another tricky situation you might see is when you don't see any of the emotions expressed.",
         exampleText: "the office party will take place the week before Christmas",
         noEmotionTag: "No clear emotion",
-        outro: "It is unclear what emotion the writer feels in the statement. Maybe they are excited and feeling joy or dislike after-hours events and feel anger about the party. In this case, please select <b>\"No emotion\"</b> rather than guessing or choosing at random.",
+        outro: "It is unclear what emotion the writer feels in the statement. Maybe they are excited about the party and feeling joy or dislike after-hours events and are angry. In this case, please select <b>\"No emotion\"</b> rather than guessing or choosing at random.",
       },
       { heading: "Emotion Wheel", paragraphs: [
-          "In reality, there are a wide array of emotions people may have which are far more varied and nuanced than the six we chose. While we're justing using these six, you can use the emotion wheel to see which more of the six broader emotions is linked to the specific emotion. Start at a the specific emotion you suspect and trace the emotions in to find which of the six it falls under. For example, \"jealousy\" falls under anger and \"awe\" is under surprise.",
+          "In reality, there are a wide array of emotions people may have which are far more varied and nuanced than the six we chose. While we're justing using these six, you can use the emotion wheel to see which more of the six broader emotions is linked to the specific emotion. Start at a the specific emotion you suspect and trace the emotion in to find which of the six it falls under. For example, \"jealousy\" falls under anger and \"awe\" is under surprise.",
           "You'll have access to this wheel that you can refer to at any point by hitting the \"Emotion Wheel\" button.",
         ],
-        previewBtn: "🎨 See the Emotion Wheel",
+        previewBtn: "🛞 See the Emotion Wheel",
       },
       { heading: "Notes", paragraphs: [
           "At any point, you can hit <b>\"Save &amp; Quit\"</b> to save your progress and come back later.",
@@ -577,19 +577,19 @@ var COPY = {
 
   qualify: {
     tag: "Practice",
-    heading: "Let's try a practice tweet",
+    heading: "Practice",
     instructions: "Read the tweet and pick the emotion that's most being expressed.",
-    startBtn: "Start Labeling →",
+    startBtn: "Start",
     correctFeedback: "✅ <b>Correct!</b> \"Grouchy\" describes irritability and short-temperedness — a form of Anger.",
     incorrectFeedback: "❌ <b>Not quite.</b> This tweet describes feeling \"grouchy,\" which is a form of <b>Anger</b>. Try to pick the emotion that is most coming through from the writer and use \"Cannot choose\" only when you really can' choose between mutliple emotions.",
   },
 
   task: {
     progressTemplate: "Tweet {n} of {total}",
-    wheelBtn: "🎨 Emotion Wheel",
+    wheelBtn: "🛞 Emotion Wheel",
     saveQuitBtn: "Save &amp; Quit",
     exitBtn: "Exit",
-    nextBtn: "Next →",
+    nextBtn: "Next",
     exitConfirm: "Exit the task? Anything you've already submitted is saved — only the tweet you're on right now won't count.",
   },
 
@@ -607,7 +607,7 @@ var COPY = {
     tableHeaders: ["#", "Tweet", "Your label"],
     totalTemplate: "You've labeled {count} tweet{plural} so far.",
     downloadBtn: "Download my responses as CSV",
-    moreBtn: "Label 5 more →",
+    moreBtn: "Label 5 more",
     homeBtn: "Back to Home",
   },
   about: {
@@ -645,7 +645,7 @@ var COPY = {
 
   wheelModal: {
     title: "The Emotion Wheel",
-    body: "Our task only uses <b>anger, fear, joy, love, sadness</b> and <b>surprise</b>. For anything else, look at the emotion and trace it in to one of the six emotions we use or select \"Cannot choose\"/\"No emotion.\"",
+    body: "Our task only uses <b>anger, fear, joy, love, sadness</b> and <b>surprise</b>. For anything else, look at the emotion and trace it in to one of the six emotions we use or select \"Cannot choose\" or \"No emotion\". If the emotion falls under 'Bad' or 'Digsut', \"No emotion\".",
   },
 };
 // Fills {tokens} in a COPY template string with values, e.g.
@@ -1156,13 +1156,13 @@ document.addEventListener("keydown", (e)=>{
    buttons; "Bad" and "Disgusted" (which aren't task categories) get two
    new colors. ---- */
 const FEELINGS_WHEEL = [
-  ["Bad", "#3fae8a", [
+  ["Bad", "#D3D3D3", [
     ["Tired", ["Sleepy","Unfocused"]],
     ["Stressed", ["Overwhelmed","Out of control"]],
     ["Busy", ["Rushed","Pressured"]],
     ["Bored", ["Apathetic","Indifferent"]],
   ]],
-  ["Fearful", "var(--fear)", [
+  ["Fearf", "var(--fear)", [
     ["Scared", ["Helpless","Frightened"]],
     ["Anxious", ["Concerned","Worried"]],
     ["Insecure", ["Inadequate","Inferior"]],
@@ -1170,7 +1170,7 @@ const FEELINGS_WHEEL = [
     ["Rejected", ["Excluded","Persecuted"]],
     ["Threatened", ["Nervous","Exposed"]],
   ]],
-  ["Angry", "var(--anger)", [
+  ["Anger", "var(--anger)", [
     ["Let down", ["Betrayed","Resentful"]],
     ["Humiliated", ["Disrespected","Ridiculed"]],
     ["Bitter", ["Indignant","Violated"]],
@@ -1180,13 +1180,13 @@ const FEELINGS_WHEEL = [
     ["Distant", ["Withdrawn","Numb"]],
     ["Critical", ["Sceptical","Dismissive"]],
   ]],
-  ["Disgusted", "#8a5a52", [
+  ["Disgust", "#D3D3D3", [
     ["Disapproving", ["Judgmental","Condemned"]],
     ["Uncomfortable", ["Appalled","Revolted"]],
     ["Awful", ["Nauseated","Detestable"]],
     ["Repelled", ["Horrified","Hesitant"]],
   ]],
-  ["Sad", "var(--sadness)", [
+  ["Sadness", "var(--sadness)", [
     ["Hurt", ["Disappointed","Embarrassed"]],
     ["Depressed", ["Empty","Unseen"]],
     ["Guilty", ["Ashamed","Remorseful"]],
@@ -1194,7 +1194,7 @@ const FEELINGS_WHEEL = [
     ["Vulnerable", ["Fragile","Victimised"]],
     ["Lonely", ["Abandoned","Isolated"]],
   ]],
-  ["Happy", "var(--joy)", [
+  ["Joy", "var(--joy)", [
     ["Optimistic", ["Hopeful","Inspired"]],
     ["Trusting", ["Sensitive","Intimate"]],
     ["Peaceful", ["Loving","Thankful"]],
@@ -1205,7 +1205,7 @@ const FEELINGS_WHEEL = [
     ["Content", ["Free","Joyful"]],
     ["Playful", ["Aroused","Cheeky"]],
   ]],
-  ["Surprised", "var(--surprise)", [
+  ["Surprise", "var(--surprise)", [
     ["Startled", ["Shocked","Dismayed"]],
     ["Confused", ["Disillusioned","Perplexed"]],
     ["Amazed", ["Astonished","Awe"]],
