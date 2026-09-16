@@ -147,6 +147,12 @@ button{font-family:inherit; cursor:pointer;}
 .btn-primary:hover{background:var(--cta-dark);}
 .btn-ghost{background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,0.5);}
 .btn-ghost:hover{border-color:#fff;}
+/* Buttons that sit directly on the dark page background (not inside a white
+   card) — .btn-ghost's thin, unfilled border reads as "barely there" against
+   dark navy even though its text is already white. This gives them a visible
+   frosted fill and a much brighter border so they look present, not faint. */
+.btn-dark{background:rgba(255,255,255,0.14); color:#fff; border:1.5px solid rgba(255,255,255,0.75);}
+.btn-dark:hover{background:rgba(255,255,255,0.22); border-color:#fff;}
 .btn-outline{background:transparent; color:var(--ink); border:1.5px solid var(--line);}
 .btn-outline:hover{border-color:var(--ink);}
 .btn-small{padding:8px 16px; font-size:13px; border-radius:999px;}
@@ -154,12 +160,12 @@ button{font-family:inherit; cursor:pointer;}
 
 /* ---------- HOME ---------- */
 .tag{
-  display:inline-block; background:rgba(47,184,166,0.12); color:var(--cta-dark);
+  display:inline-block; background:rgba(47,184,166,0.22); color:#8fe3d6;
   font-weight:700; font-size:12.5px; letter-spacing:0.6px; text-transform:uppercase;
   padding:6px 12px; border-radius:999px; margin-bottom:16px;
 }
-.hero-title{font-size:38px; margin:0 0 14px;}
-.hero-sub{color:var(--ink-soft); font-size:16.5px; line-height:1.6; max-width:560px; margin:0 auto 26px;}
+.hero-title{font-size:38px; margin:0 0 14px; color:#fff;}
+.hero-sub{color:#c7cde2; font-size:16.5px; line-height:1.6; max-width:560px; margin:0 auto 26px;}
 .sample-tweet{
   background:var(--panel-soft); border-radius:14px; padding:18px 20px; text-align:left;
   max-width:420px; margin:0 auto 30px; border:1px solid var(--line);
@@ -206,9 +212,11 @@ button{font-family:inherit; cursor:pointer;}
 .example-tags{margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;}
 .pill{padding:5px 12px; border-radius:999px; font-size:12.5px; font-weight:700; color:#fff;}
 
-.wheel-wrap{display:flex; flex-direction:column; align-items:center; margin:20px 0;}
-.wheel-wrap svg{filter:drop-shadow(0 12px 24px rgba(0,0,0,0.25));}
-.wheel-legend{font-size:12px; color:var(--ink-soft); margin-top:10px; text-align:center; max-width:280px;}
+.wheel-wrap{display:flex; justify-content:center; margin:14px 0 4px;}
+.wheel-wrap svg{filter:drop-shadow(0 12px 24px rgba(0,0,0,0.25)); display:block; margin:0 auto;
+  width:100%; min-width:620px; max-width:820px; height:auto;}
+.wheel-modal-card{max-width:min(920px, 96vw); width:100%; max-height:92vh; overflow-y:auto; padding:28px;}
+.wheel-scroll{overflow-x:auto; padding:8px 2px 4px;}
 
 /* ---------- QUALIFY ---------- */
 .feedback-panel{border-radius:12px; padding:16px 18px; margin-top:18px; text-align:left; font-size:14.5px; line-height:1.55;}
@@ -285,26 +293,25 @@ th{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spaci
         <div class="envelope-flap"></div>
         <div class="envelope-seal"></div>
       </div>
-      <div class="envelope-hint" id="envelope-hint">Click to open</div>
+      <div class="envelope-hint" id="envelope-hint"></div>
     </div>
     <div id="letter" class="letter">
-      <div class="letter-title">Welcome to the Label Zone!</div>
-      <p>Here, you will help researchers in essential projects that rely on <em>your</em> work. You will help label a dataset with different emotions, to help researchers study how emotion shows up in everyday language.</p>
-      <p>It only takes about five minutes. Ready?</p>
-      <button class="btn btn-primary" id="continue-btn">Continue →</button>
+      <div class="letter-title" id="letter-title"></div>
+      <div id="letter-body"></div>
+      <button class="btn btn-primary" id="continue-btn"></button>
     </div>
   </div>
 </section>
 
 <!-- ============ NAV ============ -->
 <nav id="navbar">
-  <div class="brand"><span class="brand-dot"></span> The Emotion Project</div>
+  <div class="brand"><span class="brand-dot"></span> <span id="nav-brand"></span></div>
   <div class="nav-links">
-    <button class="nav-btn" data-nav="home">Home</button>
-    <button class="nav-btn" data-nav="classify">Classify</button>
-    <button class="nav-btn" data-nav="about">About</button>
-    <button class="nav-btn" data-nav="feedback">Give Feedback</button>
-    <button class="nav-btn" data-nav="data">Data</button>
+    <button class="nav-btn" data-nav="home"></button>
+    <button class="nav-btn" data-nav="classify"></button>
+    <button class="nav-btn" data-nav="about"></button>
+    <button class="nav-btn" data-nav="feedback"></button>
+    <button class="nav-btn" data-nav="data"></button>
   </div>
 </nav>
 
@@ -312,14 +319,14 @@ th{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spaci
 <section id="screen-home" class="screen">
   <div class="center-wrap">
     <div id="resume-banner-slot"></div>
-    <span class="tag">Research Task · ~5 minutes</span>
-    <h1 class="hero-title">The Emotion Project</h1>
-    <p class="hero-sub">The goal of this project is to build a high-quality, human-labeled dataset of tweets tagged by the emotion they express. Your labels help researchers study how people express emotion in short, informal text. When you're ready, hit classify below!</p>
+    <span class="tag" id="home-tag"></span>
+    <h1 class="hero-title" id="home-title"></h1>
+    <p class="hero-sub" id="home-subtitle"></p>
     <div class="sample-tweet">
-      <div class="tweet-author"><span class="tweet-avatar">🐦</span> @anon_user</div>
-      <div class="tweet-text">"i am now nearly finished the week detox and i feel amazing"</div>
+      <div class="tweet-author"><span class="tweet-avatar">🐦</span> <span id="home-tweet-author"></span></div>
+      <div class="tweet-text" id="home-sample-tweet-text"></div>
     </div>
-    <button class="btn btn-primary" id="start-classify-btn">Classify →</button>
+    <button class="btn btn-primary" id="start-classify-btn"></button>
   </div>
 </section>
 
@@ -327,13 +334,13 @@ th{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spaci
 <section id="screen-id" class="screen">
   <div class="center-wrap">
     <div class="card" style="text-align:left; max-width:420px;">
-      <h2 style="margin-top:0;">Before we start</h2>
-      <p style="color:var(--ink-soft); font-size:14.5px; margin-bottom:20px;">Enter a name or alias so we can keep track of which tweets you've labeled. This can be anything — it doesn't need to be your real name.</p>
+      <h2 style="margin-top:0;" id="id-heading"></h2>
+      <p style="color:var(--ink-soft); font-size:14.5px; margin-bottom:20px;" id="id-body"></p>
       <div class="id-form">
-        <label for="participant-input">Your name or alias</label>
-        <input id="participant-input" type="text" placeholder="e.g. annotator_07" maxlength="40">
-        <div class="hint">This is stored only in your browser, alongside your labels.</div>
-        <button class="btn btn-primary" id="id-continue-btn" style="width:100%; justify-content:center;">Continue →</button>
+        <label for="participant-input" id="id-label"></label>
+        <input id="participant-input" type="text" maxlength="40">
+        <div class="hint" id="id-hint"></div>
+        <button class="btn btn-primary" id="id-continue-btn" style="width:100%; justify-content:center;"></button>
       </div>
     </div>
   </div>
@@ -345,8 +352,8 @@ th{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spaci
     <div class="tut-progress" id="tut-progress"></div>
     <div class="card tut-body" id="tut-body"></div>
     <div class="tut-nav">
-      <button class="btn btn-outline" id="tut-back-btn">← Back</button>
-      <button class="btn btn-primary" id="tut-next-btn">Next →</button>
+      <button class="btn btn-dark" id="tut-back-btn"></button>
+      <button class="btn btn-primary" id="tut-next-btn"></button>
     </div>
   </div>
 </section>
@@ -355,18 +362,18 @@ th{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spaci
 <section id="screen-qualify" class="screen">
   <div class="page-wrap">
     <div class="card">
-      <span class="tag">Quick Check</span>
-      <h2 style="margin-top:10px;">Let's try one together</h2>
-      <p style="color:var(--ink-soft); font-size:15px;">Read the tweet below and pick the emotion that's most being expressed. This one won't count toward your 5 real tweets — it's just so we know the tool makes sense to you.</p>
+      <span class="tag" id="qualify-tag"></span>
+      <h2 style="margin-top:10px;" id="qualify-heading"></h2>
+      <p style="color:var(--ink-soft); font-size:15px;" id="qualify-instructions"></p>
       <div class="tweet-card" style="margin-top:18px;">
-        <div class="tweet-author"><span class="tweet-avatar">🐦</span> @anon_user</div>
+        <div class="tweet-author"><span class="tweet-avatar">🐦</span> <span id="qualify-tweet-author"></span></div>
         <div class="tweet-text" id="qualify-text"></div>
       </div>
       <div class="option-grid" id="qualify-options"></div>
       <div class="special-row" id="qualify-special"></div>
       <div id="qualify-feedback"></div>
       <div class="task-footer">
-        <button class="btn btn-primary" id="qualify-start-btn" style="display:none;">Start Labeling →</button>
+        <button class="btn btn-primary" id="qualify-start-btn" style="display:none;"></button>
       </div>
     </div>
   </div>
@@ -377,23 +384,23 @@ th{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spaci
   <div class="page-wrap">
     <div id="task-topbar">
       <div>
-        <div class="progress-label" id="task-progress-label">Tweet 1 of 5</div>
+        <div class="progress-label" id="task-progress-label"></div>
         <div class="progress-track"><div class="progress-fill" id="task-progress-fill" style="width:20%;"></div></div>
       </div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost btn-small" id="wheel-btn" style="color:#fff; border-color:rgba(255,255,255,0.4);">🎨 Emotion Wheel</button>
-        <button class="btn btn-outline btn-small" id="save-quit-btn">Save &amp; Quit</button>
-        <button class="btn btn-outline btn-small" id="exit-btn">Exit</button>
+        <button class="btn btn-dark btn-small" id="wheel-btn"></button>
+        <button class="btn btn-dark btn-small" id="save-quit-btn"></button>
+        <button class="btn btn-dark btn-small" id="exit-btn"></button>
       </div>
     </div>
     <div class="tweet-card">
-      <div class="tweet-author"><span class="tweet-avatar">🐦</span> @anon_user</div>
+      <div class="tweet-author"><span class="tweet-avatar">🐦</span> <span id="task-tweet-author"></span></div>
       <div class="tweet-text" id="task-tweet-text"></div>
     </div>
     <div class="option-grid" id="task-options"></div>
     <div class="special-row" id="task-special"></div>
     <div class="task-footer">
-      <button class="btn btn-primary" id="task-next-btn" disabled>Next →</button>
+      <button class="btn btn-primary" id="task-next-btn" disabled></button>
     </div>
   </div>
 </section>
@@ -402,15 +409,15 @@ th{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spaci
 <section id="screen-thanks" class="screen">
   <div class="page-wrap">
     <div class="content-card" style="text-align:center;">
-      <span class="tag">All done</span>
-      <h2>Thank you for labeling!</h2>
-      <p>Here's what you submitted. Feel free to screenshot this for your records.</p>
-      <table id="thanks-table"><thead><tr><th>#</th><th>Tweet</th><th>Your label</th></tr></thead><tbody></tbody></table>
+      <span class="tag" id="thanks-tag"></span>
+      <h2 id="thanks-heading"></h2>
+      <p id="thanks-body"></p>
+      <table id="thanks-table"><thead><tr><th id="thanks-th-0"></th><th id="thanks-th-1"></th><th id="thanks-th-2"></th></tr></thead><tbody></tbody></table>
       <p class="small-note" id="thanks-total-note"></p>
       <div class="data-actions" style="justify-content:center;">
-        <button class="btn btn-outline btn-small" id="thanks-download-btn">Download my responses (CSV)</button>
-        <button class="btn btn-primary btn-small" id="thanks-more-btn">Keep going — label 5 more →</button>
-        <button class="btn btn-outline btn-small" id="thanks-home-btn">Back to Home</button>
+        <button class="btn btn-outline btn-small" id="thanks-download-btn"></button>
+        <button class="btn btn-primary btn-small" id="thanks-more-btn"></button>
+        <button class="btn btn-outline btn-small" id="thanks-home-btn"></button>
       </div>
     </div>
   </div>
@@ -420,22 +427,15 @@ th{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spaci
 <section id="screen-about" class="screen">
   <div class="page-wrap">
     <div class="content-card">
-      <h2>About this project</h2>
-      <p>The Emotion Project asks volunteers to read short tweets and label the emotion most clearly expressed in each one. Your labels — combined with everyone else's — form a dataset researchers can use to study how emotion is expressed in informal, everyday text.</p>
-      <h3>The six emotions</h3>
-      <div class="emo-strip">
-        <span class="emo-chip" style="background:var(--anger);">😠 Anger</span>
-        <span class="emo-chip" style="background:var(--fear);">😨 Fear</span>
-        <span class="emo-chip" style="background:var(--joy);">😄 Joy</span>
-        <span class="emo-chip" style="background:var(--love);">🥰 Love</span>
-        <span class="emo-chip" style="background:var(--sadness);">😢 Sadness</span>
-        <span class="emo-chip" style="background:var(--surprise);">😲 Surprise</span>
-      </div>
-      <h3>Where the tweets come from</h3>
-      <p>The tweets in this task are drawn from the publicly available <strong>Emotion</strong> dataset (Saravia et al., 2018), hosted on Hugging Face at <em>dair-ai/emotion</em>. It contains English-language tweets originally labeled with one of six basic emotions.</p>
-      <h3>A note on this kind of work</h3>
-      <p>It's worth naming honestly: using AI or automated systems to classify human emotion from text is a genuinely debated practice — text alone often under-determines what someone actually feels, and automated emotion inference has real risks of misuse. This task exists to produce careful <em>human</em> judgments, and to make the difficulty of the task (ambiguity, missing context, multiple plausible readings) visible rather than papered over.</p>
-      <div class="cite-box">Saravia, E., Liu, H-C. T., Huang, Y-H., Wu, J., &amp; Chen, Y-S. (2018). CARER: Contextualized Affect Representations for Emotion Recognition. <em>Proceedings of EMNLP 2018.</em></div>
+      <h2 id="about-heading"></h2>
+      <p id="about-intro"></p>
+      <h3 id="about-emotions-heading"></h3>
+      <div class="emo-strip" id="about-emo-strip"></div>
+      <h3 id="about-source-heading"></h3>
+      <p id="about-source-body"></p>
+      <h3 id="about-note-heading"></h3>
+      <p id="about-note-body"></p>
+      <div class="cite-box" id="about-citation"></div>
     </div>
   </div>
 </section>
@@ -444,11 +444,11 @@ th{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spaci
 <section id="screen-feedback" class="screen">
   <div class="page-wrap">
     <div class="content-card">
-      <h2>Give feedback</h2>
-      <p>Something confusing? A tweet that didn't fit any category? Let us know.</p>
-      <textarea id="feedback-text" placeholder="Type your feedback here..."></textarea>
+      <h2 id="feedback-heading"></h2>
+      <p id="feedback-prompt"></p>
+      <textarea id="feedback-text"></textarea>
       <div style="margin-top:14px;">
-        <button class="btn btn-primary" id="feedback-submit-btn">Submit feedback</button>
+        <button class="btn btn-primary" id="feedback-submit-btn"></button>
       </div>
       <div id="feedback-confirm" class="small-note"></div>
     </div>
@@ -459,32 +459,202 @@ th{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spaci
 <section id="screen-data" class="screen">
   <div class="page-wrap">
     <div class="content-card">
-      <h2>Collected data (this browser)</h2>
-      <p style="margin-bottom:0;">This view shows every label submitted from this browser — it's meant for testing and for the instructor to review, not a live multi-device database. Each row records <strong>who</strong> labeled <strong>which tweet</strong> with <strong>which label</strong>.</p>
+      <h2 id="data-heading"></h2>
+      <p style="margin-bottom:0;" id="data-intro"></p>
       <div class="stat-row" id="data-stats"></div>
       <div class="data-actions">
-        <button class="btn btn-outline btn-small" id="export-csv-btn">Download all data (CSV)</button>
-        <button class="btn btn-outline btn-small" id="export-json-btn">Download all data (JSON)</button>
-        <button class="btn btn-ghost btn-small" id="clear-data-btn" style="color:var(--anger); border-color:var(--anger);">Clear all data</button>
+        <button class="btn btn-outline btn-small" id="export-csv-btn"></button>
+        <button class="btn btn-outline btn-small" id="export-json-btn"></button>
+        <button class="btn btn-ghost btn-small" id="clear-data-btn" style="color:var(--anger); border-color:var(--anger);"></button>
       </div>
-      <table id="data-table"><thead><tr><th>Participant</th><th>Tweet ID</th><th>Tweet</th><th>Label</th><th>Time</th></tr></thead><tbody></tbody></table>
-      <div class="small-note">Data lives in this browser's local storage only. Clearing browser data, or opening the site in a different browser/device, starts a fresh store.</div>
+      <table id="data-table"><thead><tr><th id="data-th-0"></th><th id="data-th-1"></th><th id="data-th-2"></th><th id="data-th-3"></th><th id="data-th-4"></th></tr></thead><tbody></tbody></table>
+      <div class="small-note" id="data-footer-note"></div>
     </div>
   </div>
 </section>
 
 <!-- ============ WHEEL MODAL ============ -->
-<div id="wheel-modal" style="display:none; position:fixed; inset:0; background:rgba(11,19,48,0.7); z-index:100; align-items:center; justify-content:center;">
-  <div class="card" style="max-width:340px; text-align:center; position:relative;">
-    <button id="wheel-close-btn" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:18px; cursor:pointer; color:var(--ink-soft);">✕</button>
-    <h3 style="margin-top:0;">The Emotion Wheel</h3>
-    <p style="color:var(--ink-soft); font-size:13.5px;">If a tweet expresses a narrower emotion, use this wheel to find its closest parent category among our six.</p>
-    <div class="wheel-wrap" id="wheel-graphic"></div>
-    <div class="wheel-legend">Inner ring = the six main categories. Outer ring = narrower emotions, grouped under their closest main category.</div>
+<div id="wheel-modal" style="display:none; position:fixed; inset:0; background:rgba(11,19,48,0.7); z-index:100; align-items:center; justify-content:center; padding:20px;">
+  <div class="card wheel-modal-card" style="text-align:center; position:relative;">
+    <button id="wheel-close-btn" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--ink-soft); z-index:2;">✕</button>
+    <h3 style="margin-top:0;" id="wheel-modal-title"></h3>
+    <p style="color:var(--ink-soft); font-size:13.5px; max-width:560px; margin:0 auto 4px;" id="wheel-modal-body"></p>
+    <div class="wheel-scroll"><div class="wheel-wrap" id="wheel-graphic"></div></div>
   </div>
 </div>
 
 <script>
+/* =====================================================================
+   EDITABLE TEXT — every word displayed anywhere in this app lives here.
+   Change any string below and reload the page; you don't need to touch
+   any HTML or logic elsewhere in the file. A few notes:
+   - {placeholder} tokens in curly braces get filled in by the code
+     (e.g. a name or a count) — keep the braces if you edit those lines.
+   - HTML tags like <b>, <em>, <strong> inside a string are fine to
+     keep, remove, or add; they render as formatting, not literal text.
+   - Emotion names/definitions and the tutorial's example tweets live in
+     CATS / TUT below this block (still near the top, still plain
+     variables you can edit) rather than here, since they're structured
+     data (colors, categories) as much as they are text.
+===================================================================== */
+var COPY = {
+  pageTitle: "The Emotion Project",
+
+  nav: {
+    brand: "The Emotion Project",
+    home: "Home",
+    classify: "Classify",
+    about: "About",
+    feedback: "Give Feedback",
+    data: "Data",
+  },
+
+  landing: {
+    envelopeHint: "Click to open",
+    letterTitle: "Welcome to the Emotion Project!",
+    letterParagraphs: [
+      "You are essential part of our work! You will help build a dataset of human emotions that researchers will use to improve the emotional awareness of AI models. This should only take 5 minutes. Ready?",
+    ],
+    continueBtn: "Continue →",
+  },
+
+  home: {
+    tag: "Research Task · ~5 minutes",
+    title: "The Emotion Project",
+    subtitle: "The goal is to create a high-quality dataset of tweets associated with emotions being expressed by writers. When you're ready to start annotating, hit classify below.",
+    sampleTweetText: "i am now nearly finished the week detox and i feel amazing",
+    startBtn: "Classify →",
+    resumeTemplate: "You have an unfinished session as <b>{name}</b> ({progress}/5 done).",
+    resumeBtn: "Resume →",
+  },
+
+  idScreen: {
+    heading: "Before we start",
+    body: "Enter your name so we can track the tweets you've labeled. This can be your real name or a username.",
+    label: "Your name or username",
+    placeholder: "e.g. annotator_07",
+    hint: "You name or username will be stored along iwth your your labels.",
+    continueBtn: "Continue →",
+  },
+
+  tutorial: {
+    backBtn: "← Back",
+    nextBtn: "Next →",
+    lastStepBtn: "Try a practice tweet →",
+    exampleLabel: "Example",
+    steps: [
+      { heading: "You're in!", paragraphs: [
+          "ou'll be annotating tweets with the one emotion you think the writer is <em>most</em> expressing> your choices for emotions are:: <b>anger, fear, joy, love, sadness,</b> and <b>surprise</b>.",
+          "First, we'll define each emotion more clearly and the task at hand. Next, we'll show you how to use the tool. Then you'll be ready to start.",
+      ]},
+      { heading: "The task", paragraphs: [
+          "You'll be shown a tweet and asked which emotion the writer is <b>most</b> expressing. As a reminder, the options are anger, fear, joy, love, sadness, and surprise. There will also be two additional options for special cases which we will discuss soon.",
+      ]},
+      { heading: "The six emotions", intro: "Here's exactly how we define each emotion:" },
+      { heading: "When more than one emotion fits",
+        intro: "You might come across a tweet where multiple emotions are being expressed at once. For example:",
+        exampleText: "omg i cannot believe you flew all threw me a surprise birthday part. i love you so much",
+        exampleCats: ["love","surprise"],
+        outro: "The key is to mark the <b>one</b> emotion that you think the writer is showing. In this case, Love would be selected because the surprise is really just in detail in the writer expressing their love for someone. If you really can't choose between multiple emotions, select <b>\"Cannot choose\"</b>.",
+      },
+      { heading: "When no emotions fit",
+        intro: "Another tricky situation you may come across is when you don't see any of the emotions being expressed. For example:",
+        exampleText: "the office party will take place the week before Christmas",
+        noEmotionTag: "No clear emotion",
+        outro: "In this case, please select <b>\"No emotion\"</b> rather than guessing or choosing at random.",
+      },
+      { heading: "Narrower emotions", paragraphs: [
+          "In reality, there are a wide array of emotions that can be far more varied and nuanced than these six. We're using just htese six emotions. If you think there is a more specific or a different emotion being expressed, you may use the emotion wheel to see how it relates to the main six emotions. Start at a the emotion you suspect and trace the emotions inward to find which of the six it falls under. For example, \"jealousy\" falls under Angry \"awe\" is under Surprised.",
+          "You'll have access to this wheel that you can refer to at any point by hitting the \"Emotion Wheel\" button.",
+        ],
+        previewBtn: "🎨 Preview the Feelings Wheel",
+      },
+      { heading: "One more thing", paragraphs: [
+          "At any point during the task, you can hit <b>\"Save &amp; Quit\"</b> to save your progress and come back later.",
+          "Ready? Hit \"Next\" to try a quick practice tweet and then start annotating.",
+      ]},
+    ],
+  },
+
+  qualify: {
+    tag: "Practice",
+    heading: "Let's try a practice tweet",
+    instructions: "Read the tweet and pick the emotion that's most being expressed.",
+    startBtn: "Start Labeling →",
+    correctFeedback: "✅ <b>Correct!</b> \"Grouchy\" describes irritability and short-temperedness — a form of Anger.",
+    incorrectFeedback: "❌ <b>Not quite.</b> This tweet describes feeling \"grouchy,\" which is a form of <b>Anger</b>. Try to pick the emotion that is most coming through from the writer and use \"Cannot choose\" only when you really can' choose between mutliple emotions.",
+  },
+
+  task: {
+    progressTemplate: "Tweet {n} of {total}",
+    wheelBtn: "🎨 Emotion Wheel",
+    saveQuitBtn: "Save &amp; Quit",
+    exitBtn: "Exit",
+    nextBtn: "Next →",
+    exitConfirm: "Exit the task? Anything you've already submitted is saved — only the tweet you're on right now won't count.",
+  },
+
+  specialOptions: {
+    cannot: "🤔 Cannot choose",
+    none: "🚫 No emotion",
+  },
+
+  tweetAuthor: "@anon_user",
+
+  thanks: {
+    tag: "All done",
+    heading: "Thank you for labeling!",
+    body: "Here's what you submitted.",
+    tableHeaders: ["#", "Tweet", "Your label"],
+    totalTemplate: "You've labeled {count} tweet{plural} so far.",
+    downloadBtn: "Download my responses as CSV",
+    moreBtn: "Label 5 more →",
+    homeBtn: "Back to Home",
+  },
+  about: {
+    heading: "About the project",
+    intro: "The goal of the Emotion Project is to build a dataset that can help researchers make AI more emotionally aware. To do this, volunteers are needed to build this emotion dataset. Volunteer annotators read short tweets and label the emotion being expressed in each. This is a crowd-sourced project. So no single person is responsible for annotating the entire collection of tweets! That means you can label as many or few as you want (we ask you complete 5 at a time). Start now and finish later if you need! Any amount of time you can give will be valuable!",
+    emotionsHeading: "The six emotions",
+    sourceHeading: "Where the tweets come from",
+    sourceBody: "The tweets come from the publicly available <strong>Emotion</strong> dataset (Saravia et al., 2018). They contain tweets in English that were originally tweeted with  hashtags that have been associated with the six emotions. Sadness came from #depressed, #grief, joy from #fun, #joy, fear from #fear, #worried, anger from #mad, #pissed, surprise from #strange, #surprise. These labels are imperfect which can lead to problems when training a model. That is why wwe are usign them as a starting point for more precise human-labeled data.",
+    noteHeading: "A note on this work",
+    noteBody: "This work faces an ethical dillema described best by Professor Vera Liao while teaching ECE 594 Human-AI Interaction at the University of Michigan Ann Arbor. Proessor Liao notes 'using AI to classify or analyze human emotions is a questionable use case of AI'. The context in which the data is used is crucial for evaluating the ethical nature of the AI task. It is important that each AI pracitioner does so before using this dataset.",
+    citation: "Saravia, E., Liu, H-C. T., Huang, Y-H., Wu, J., &amp; Chen, Y-S. (2018). CARER: Contextualized Affect Representations for Emotion Recognition. <em>Proceedings of EMNLP 2018.</em>",
+  },
+
+  feedback: {
+    heading: "Give feedback",
+    prompt: "If you have any ideas for how we can improve our annotation process, please leave feedback!",
+    placeholder: "Type your feedback here...",
+    submitBtn: "Submit feedback",
+    confirmMsg: "Your feedback was recorded.",
+  },
+
+  data: {
+    heading: "Annotated data",
+    intro: "This view shows every label submitted from this browser. Each row records <strong>who</strong> labeled <strong>which tweet</strong> with <strong>which label</strong>.",
+    statLabels: ["total labels", "participants", "unique tweets seen"],
+    csvBtn: "Download data as CSV",
+    jsonBtn: "Download data as JSON",
+    clearBtn: "Clear all data",
+    clearConfirm: "This deletes all collected labels in this browser. Are you sure you want to continue? This acction is irreversible.",
+    tableHeaders: ["Participant", "Tweet ID", "Tweet", "Label", "Time"],
+    footerNote: "Data lives in this browser's storage only. Clearing browser data or opening the site in a different browser will restart the tool and lose all data.",
+    cannotChooseLabel: "Cannot choose",
+    noEmotionLabel: "No emotion",
+  },
+
+  wheelModal: {
+    title: "The Feelings Wheel",
+    body: "Our task only uses <b>anger, fear, joy, love, sadness</b> and <b>surprise</b>. For anything else, look at the emotion and trace it in to one of the six emotions we use or select \"Cannot choose\"/\"No emotion.\"",
+  },
+};
+// Fills {tokens} in a COPY template string with values, e.g.
+// fmt(COPY.task.progressTemplate, {n:2, total:5}) -> "Tweet 2 of 5".
+function fmt(template, vars){
+  return template.replace(/\{(\w+)\}/g, (m, key) => (key in vars ? vars[key] : m));
+}
+
 /* ======================= DATA ======================= */
 const CATS = {
   anger:    {label:"Anger",    emoji:"😠", color:"var(--anger)",    def:"A strong feeling of displeasure, annoyance, or hostility caused by a perceived wrong, unfairness, or threat."},
@@ -559,8 +729,6 @@ const TWEETS = [
 ];
 
 const QUALIFY_TWEET = {id:"Q1", text:"i am feeling grouchy", cat:"anger"};
-const TUT_MULTI = {text:"omg i cannot believe you flew all the way across the country just to surprise me for our anniversary — i love you so much", cats:["love","surprise"]};
-const TUT_NONE = {text:"the city council meeting has been rescheduled to 3pm on thursday", cats:[]};
 
 /* ======================= STORAGE HELPERS ======================= */
 const NS = "emoLab_";
@@ -674,10 +842,10 @@ function renderHome(){
     if(progress > 0 && progress < 5){
       const banner = document.createElement("div");
       banner.className = "resume-banner";
-      banner.innerHTML = `<span>You have an unfinished session as <b>${escapeHtml(state.participant.id)}</b> (${progress}/5 done).</span>`;
+      banner.innerHTML = `<span>${fmt(COPY.home.resumeTemplate, {name: escapeHtml(state.participant.id), progress})}</span>`;
       const btn = document.createElement("button");
       btn.className = "btn btn-primary btn-small";
-      btn.textContent = "Resume →";
+      btn.textContent = COPY.home.resumeBtn;
       btn.addEventListener("click", ()=>{ renderTaskScreen(); });
       banner.appendChild(btn);
       slot.appendChild(banner);
@@ -726,39 +894,56 @@ document.getElementById("id-continue-btn").addEventListener("click", ()=>{
 
 /* ======================= TUTORIAL ======================= */
 const TUT_STEPS = [
-  ()=>`<h2>You're in!</h2>
-    <p>Thank you for starting. You'll be labeling tweets with the emotion you think the writer is trying to express, one of: <b>anger, fear, joy, love, sadness,</b> and <b>surprise</b>.</p>
-    <p>First, we'll define the emotions and the task. Then we'll show you how to use the tool. Then you're off to annotating!</p>`,
-  ()=>`<h2>The task</h2>
-    <p>The task is simple: you'll be shown a tweet and asked which emotion is <b>most</b> being expressed. The options are anger, fear, joy, love, sadness, and surprise — plus two special options for tricky cases, which we'll cover shortly.</p>`,
-  ()=>`<h2>The six emotions</h2>
-    <p>Here's exactly what we mean by each one:</p>
+  ()=>{
+    const s = COPY.tutorial.steps[0];
+    return `<h2>${s.heading}</h2>${s.paragraphs.map(p=>`<p>${p}</p>`).join("")}`;
+  },
+  ()=>{
+    const s = COPY.tutorial.steps[1];
+    return `<h2>${s.heading}</h2>${s.paragraphs.map(p=>`<p>${p}</p>`).join("")}`;
+  },
+  ()=>{
+    const s = COPY.tutorial.steps[2];
+    return `<h2>${s.heading}</h2>
+    <p>${s.intro}</p>
     <div class="def-grid">${CAT_ORDER.map(c=>{
       const d = CATS[c];
       return `<div class="def-card"><div class="def-emoji">${d.emoji}</div><div class="def-name">${d.label}</div><div class="def-text">${d.def}</div></div>`;
-    }).join("")}</div>`,
-  ()=>`<h2>When more than one emotion fits</h2>
-    <p>Often, multiple emotions may be expressed at once. For example:</p>
+    }).join("")}</div>`;
+  },
+  ()=>{
+    const s = COPY.tutorial.steps[3];
+    return `<h2>${s.heading}</h2>
+    <p>${s.intro}</p>
     <div class="example-box">
-      <div class="example-label">Example</div>
-      <div class="tweet-text" style="font-size:16px;">"${TUT_MULTI.text}"</div>
-      <div class="example-tags">${TUT_MULTI.cats.map(c=>`<span class="pill" style="background:${CATS[c].color}">${CATS[c].emoji} ${CATS[c].label}</span>`).join("")}</div>
+      <div class="example-label">${COPY.tutorial.exampleLabel}</div>
+      <div class="tweet-text" style="font-size:16px;">"${s.exampleText}"</div>
+      <div class="example-tags">${s.exampleCats.map(c=>`<span class="pill" style="background:${CATS[c].color}">${CATS[c].emoji} ${CATS[c].label}</span>`).join("")}</div>
     </div>
-    <p>The key is to mark the <b>one</b> emotion that is most prominent (here, most annotators would pick Love, since the surprise is really in service of an expression of love). If you truly cannot choose between two, select <b>"Cannot choose"</b>.</p>`,
-  ()=>`<h2>When no emotion fits</h2>
-    <p>Sometimes, none of the six emotions are relevant. For example:</p>
+    <p>${s.outro}</p>`;
+  },
+  ()=>{
+    const s = COPY.tutorial.steps[4];
+    return `<h2>${s.heading}</h2>
+    <p>${s.intro}</p>
     <div class="example-box">
-      <div class="example-label">Example</div>
-      <div class="tweet-text" style="font-size:16px;">"${TUT_NONE.text}"</div>
-      <div class="example-tags"><span class="pill" style="background:#8890ac;">No clear emotion</span></div>
+      <div class="example-label">${COPY.tutorial.exampleLabel}</div>
+      <div class="tweet-text" style="font-size:16px;">"${s.exampleText}"</div>
+      <div class="example-tags"><span class="pill" style="background:#8890ac;">${s.noEmotionTag}</span></div>
     </div>
-    <p>If that's the case, please select <b>"No emotion"</b> rather than guessing.</p>`,
-  ()=>`<h2>Narrower emotions</h2>
-    <p>Real emotions can be far more specific than just six words. We're sticking to these six main categories. If you feel a more specific emotion is expressed (say, "jealousy" or "awe"), please defer to its closest match on the emotion wheel below — the inner ring is the six main categories, and the outer ring shows narrower emotions grouped under each one. You'll have access to this wheel at all times during the task by hitting the "Emotion Wheel" button.</p>
-    <div class="wheel-wrap">${buildEmotionWheelSVG(230)}</div>`,
-  ()=>`<h2>One more thing</h2>
-    <p>At any point during the task, you can hit <b>"Save &amp; Quit"</b> to save your progress and come back later — your existing labels are never lost.</p>
-    <p>Ready? Hit "Next" to try a quick practice tweet, then you're on to the real thing!</p>`,
+    <p>${s.outro}</p>`;
+  },
+  ()=>{
+    const s = COPY.tutorial.steps[5];
+    return `<h2>${s.heading}</h2>${s.paragraphs.map(p=>`<p>${p}</p>`).join("")}
+    <div style="text-align:center; margin-top:16px;">
+      <button class="btn btn-outline" id="tut-preview-wheel-btn" type="button">${s.previewBtn}</button>
+    </div>`;
+  },
+  ()=>{
+    const s = COPY.tutorial.steps[6];
+    return `<h2>${s.heading}</h2>${s.paragraphs.map(p=>`<p>${p}</p>`).join("")}`;
+  },
 ];
 
 function renderTutorialStep(){
@@ -770,7 +955,7 @@ function renderTutorialStep(){
     return `<div class="tut-dot ${cls}"></div>`;
   }).join("");
   document.getElementById("tut-back-btn").disabled = state.tutStep === 0;
-  document.getElementById("tut-next-btn").textContent = state.tutStep === TUT_STEPS.length-1 ? "Try a practice tweet →" : "Next →";
+  document.getElementById("tut-next-btn").textContent = state.tutStep === TUT_STEPS.length-1 ? COPY.tutorial.lastStepBtn : COPY.tutorial.nextBtn;
 }
 document.getElementById("tut-back-btn").addEventListener("click", ()=>{
   if(state.tutStep > 0){ state.tutStep--; renderTutorialStep(); }
@@ -778,6 +963,15 @@ document.getElementById("tut-back-btn").addEventListener("click", ()=>{
 document.getElementById("tut-next-btn").addEventListener("click", ()=>{
   if(state.tutStep < TUT_STEPS.length-1){ state.tutStep++; renderTutorialStep(); }
   else { renderQualifyScreen(); show("screen-qualify"); }
+});
+// The "Preview the Feelings Wheel" button only exists on one tutorial step,
+// and that step's HTML gets replaced every time renderTutorialStep() runs —
+// so this listens on the stable #tut-body container instead of the button
+// itself, which would otherwise need re-attaching on every render.
+document.getElementById("tut-body").addEventListener("click", (e)=>{
+  if(e.target && e.target.id === "tut-preview-wheel-btn"){
+    document.getElementById("wheel-modal").style.display = "flex";
+  }
 });
 
 /* ======================= OPTION BUTTON BUILDER (shared) ======================= */
@@ -796,7 +990,7 @@ function buildOptionGrid(container, onPick){
 }
 function buildSpecialRow(container, onPick){
   container.innerHTML = "";
-  [["cannot","🤔 Cannot choose"],["none","🚫 No emotion"]].forEach(([key,label])=>{
+  [["cannot",COPY.specialOptions.cannot],["none",COPY.specialOptions.none]].forEach(([key,label])=>{
     const btn = document.createElement("button");
     btn.className = "opt-btn";
     btn.dataset.special = key;
@@ -833,9 +1027,9 @@ function handleQualifyPick(picked){
   const fb = document.getElementById("qualify-feedback");
   const correct = picked === QUALIFY_TWEET.cat;
   if(correct){
-    fb.innerHTML = `<div class="feedback-panel correct">✅ <b>Correct!</b> "Grouchy" describes irritability and short-temperedness — a form of Anger.</div>`;
+    fb.innerHTML = `<div class="feedback-panel correct">${COPY.qualify.correctFeedback}</div>`;
   } else {
-    fb.innerHTML = `<div class="feedback-panel incorrect">❌ <b>Not quite.</b> This tweet describes feeling "grouchy," which is a form of <b>Anger</b> (irritability/annoyance). Remember: pick whichever emotion is most prominent, and use "Cannot choose" only when you're genuinely torn.</div>`;
+    fb.innerHTML = `<div class="feedback-panel incorrect">${COPY.qualify.incorrectFeedback}</div>`;
   }
   document.getElementById("qualify-start-btn").style.display = "inline-flex";
 }
@@ -881,7 +1075,7 @@ function renderTaskScreen(_retried){
     return;
   }
   document.getElementById("task-tweet-text").textContent = `"${tweet.text}"`;
-  document.getElementById("task-progress-label").textContent = `Tweet ${idx+1} of 5`;
+  document.getElementById("task-progress-label").textContent = fmt(COPY.task.progressTemplate, {n: idx+1, total: 5});
   document.getElementById("task-progress-fill").style.width = ((idx)/5*100)+"%";
   state.taskSelected = null;
   document.getElementById("task-next-btn").disabled = true;
@@ -934,7 +1128,7 @@ document.getElementById("save-quit-btn").addEventListener("click", ()=>{
   renderHome();
 });
 document.getElementById("exit-btn").addEventListener("click", ()=>{
-  if(confirm("Exit the task? Anything you've already submitted is saved — only the tweet you're on right now won't count.")){
+  if(confirm(COPY.task.exitConfirm)){
     renderHome();
   }
 });
@@ -953,55 +1147,145 @@ document.addEventListener("keydown", (e)=>{
   }
 });
 
-/* ---- Real subdivided emotion wheel: inner ring = 6 primary emotions,
-   outer ring = 2 narrower emotions per primary, built as one SVG. ---- */
-const SUBEMOTIONS = {
-  anger:    ["Annoyance","Rage"],
-  fear:     ["Apprehension","Terror"],
-  joy:      ["Contentment","Ecstasy"],
-  love:     ["Affection","Adoration"],
-  sadness:  ["Pensiveness","Grief"],
-  surprise: ["Distraction","Amazement"],
-};
+/* ---- The full Feelings Wheel (7 core emotions -> ~41 second-tier ->
+   ~82 third-tier words), transcribed from the classic 3-ring Feelings
+   Wheel diagram. Core wedges are NOT equal width — each is sized by how
+   many second-tier children it has, same as the source diagram, so
+   e.g. Happy (9 children) is much wider than Bad (4 children). Five of
+   the seven core colors reuse this app's existing anger/fear/joy/sadness/
+   surprise colors so the wheel visually ties back to the task's own
+   buttons; "Bad" and "Disgusted" (which aren't task categories) get two
+   new colors. ---- */
+const FEELINGS_WHEEL = [
+  ["Bad", "#3fae8a", [
+    ["Tired", ["Sleepy","Unfocused"]],
+    ["Stressed", ["Overwhelmed","Out of control"]],
+    ["Busy", ["Rushed","Pressured"]],
+    ["Bored", ["Apathetic","Indifferent"]],
+  ]],
+  ["Fearful", "var(--fear)", [
+    ["Scared", ["Helpless","Frightened"]],
+    ["Anxious", ["Concerned","Worried"]],
+    ["Insecure", ["Inadequate","Inferior"]],
+    ["Weak", ["Worthless","Insignificant"]],
+    ["Rejected", ["Excluded","Persecuted"]],
+    ["Threatened", ["Nervous","Exposed"]],
+  ]],
+  ["Angry", "var(--anger)", [
+    ["Let down", ["Betrayed","Resentful"]],
+    ["Humiliated", ["Disrespected","Ridiculed"]],
+    ["Bitter", ["Indignant","Violated"]],
+    ["Mad", ["Furious","Jealous"]],
+    ["Aggressive", ["Provoked","Hostile"]],
+    ["Frustrated", ["Infuriated","Annoyed"]],
+    ["Distant", ["Withdrawn","Numb"]],
+    ["Critical", ["Sceptical","Dismissive"]],
+  ]],
+  ["Disgusted", "#8a5a52", [
+    ["Disapproving", ["Judgmental","Condemned"]],
+    ["Uncomfortable", ["Appalled","Revolted"]],
+    ["Awful", ["Nauseated","Detestable"]],
+    ["Repelled", ["Horrified","Hesitant"]],
+  ]],
+  ["Sad", "var(--sadness)", [
+    ["Hurt", ["Disappointed","Embarrassed"]],
+    ["Depressed", ["Empty","Unseen"]],
+    ["Guilty", ["Ashamed","Remorseful"]],
+    ["Despair", ["Powerless","Grief"]],
+    ["Vulnerable", ["Fragile","Victimised"]],
+    ["Lonely", ["Abandoned","Isolated"]],
+  ]],
+  ["Happy", "var(--joy)", [
+    ["Optimistic", ["Hopeful","Inspired"]],
+    ["Trusting", ["Sensitive","Intimate"]],
+    ["Peaceful", ["Loving","Thankful"]],
+    ["Powerful", ["Courageous","Creative"]],
+    ["Accepted", ["Respected","Valued"]],
+    ["Proud", ["Successful","Confident"]],
+    ["Interested", ["Curious","Inquisitive"]],
+    ["Content", ["Free","Joyful"]],
+    ["Playful", ["Aroused","Cheeky"]],
+  ]],
+  ["Surprised", "var(--surprise)", [
+    ["Startled", ["Shocked","Dismayed"]],
+    ["Confused", ["Disillusioned","Perplexed"]],
+    ["Amazed", ["Astonished","Awe"]],
+    ["Excited", ["Eager","Energetic"]],
+  ]],
+];
+
 function buildEmotionWheelSVG(px){
-  px = px || 240;
-  const cx=160, cy=160, rInner=34, rMid=100, rOuter=155;
-  function polar(r,deg){
-    const a=(deg-90)*Math.PI/180;
-    return {x:cx+r*Math.cos(a), y:cy+r*Math.sin(a)};
+  px = px || 720;
+  const SIZE = 900, cx = SIZE/2, cy = SIZE/2;
+  const rHub = 50, rCore = 155, rMid = 260, rLeaf = 385;
+
+  function polar(r, deg){
+    const a = (deg-90) * Math.PI/180;
+    return {x: cx + r*Math.cos(a), y: cy + r*Math.sin(a)};
   }
-  function arcPath(r0,r1,a0,a1){
-    const large = (a1-a0)<=180 ? 0 : 1;
+  function arcPath(r0, r1, a0, a1){
+    const large = (a1-a0) <= 180 ? 0 : 1;
     const p1=polar(r1,a0), p2=polar(r1,a1), p3=polar(r0,a1), p4=polar(r0,a0);
     return `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} A ${r1} ${r1} 0 ${large} 1 ${p2.x.toFixed(2)} ${p2.y.toFixed(2)} `+
            `L ${p3.x.toFixed(2)} ${p3.y.toFixed(2)} A ${r0} ${r0} 0 ${large} 0 ${p4.x.toFixed(2)} ${p4.y.toFixed(2)} Z`;
   }
-  function labelAttr(r, midAngle){
-    const p = polar(r, midAngle);
-    let rot = midAngle;
-    if(midAngle>90 && midAngle<270){ rot = midAngle+180; }
-    return `x="${p.x.toFixed(2)}" y="${p.y.toFixed(2)}" transform="rotate(${rot.toFixed(2)} ${p.x.toFixed(2)} ${p.y.toFixed(2)})"`;
+  // Radial label: text runs outward along the spoke rather than around the
+  // circumference. This matters here because the outer ring alone has ~82
+  // slices around the full circle — there isn't enough arc length for
+  // sideways text, but there's plenty of ring *depth* for text running
+  // along the radius. Flipped on the lower half so it reads upright rather
+  // than upside down.
+  function radialLabel(r, deg, text, fontSize){
+    const p = polar(r, deg);
+    let rot = deg - 90, anchor = "start";
+    if(deg > 180){ rot = deg + 90; anchor = "end"; }
+    return `<text x="${p.x.toFixed(2)}" y="${p.y.toFixed(2)}" transform="rotate(${rot.toFixed(2)} ${p.x.toFixed(2)} ${p.y.toFixed(2)})" `+
+           `text-anchor="${anchor}" font-size="${fontSize}" font-weight="600" fill="#1a2138" `+
+           `stroke="#fff" stroke-width="2.6" paint-order="stroke" font-family="Inter,sans-serif">${text}</text>`;
   }
-  let svg = `<svg viewBox="0 0 320 320" width="${px}" height="${px}" xmlns="http://www.w3.org/2000/svg">`;
-  CAT_ORDER.forEach((cat,i)=>{
-    const a0 = i*60, a1 = a0+60;
-    const color = `var(--${cat})`;
-    svg += `<path d="${arcPath(rInner,rMid,a0,a1)}" fill="${color}" stroke="#fff" stroke-width="2"></path>`;
-    const subs = SUBEMOTIONS[cat];
-    subs.forEach((name,j)=>{
-      const s0=a0+j*30, s1=s0+30;
-      svg += `<path d="${arcPath(rMid,rOuter,s0,s1)}" fill="${color}" fill-opacity="0.5" stroke="#fff" stroke-width="2"></path>`;
+  function tangentialLabel(r, deg, text, fontSize){
+    const p = polar(r, deg);
+    let rot = deg;
+    if(deg > 90 && deg < 270){ rot += 180; }
+    return `<text x="${p.x.toFixed(2)}" y="${p.y.toFixed(2)}" transform="rotate(${rot.toFixed(2)} ${p.x.toFixed(2)} ${p.y.toFixed(2)})" `+
+           `text-anchor="middle" font-size="${fontSize.toFixed(1)}" font-weight="700" fill="#1a2138" `+
+           `stroke="#fff" stroke-width="3" paint-order="stroke" font-family="Inter,sans-serif">${text}</text>`;
+  }
+
+  const totalMid = FEELINGS_WHEEL.reduce((n, [,,mids]) => n + mids.length, 0);
+  const degPerMid = 360/totalMid;
+
+  let svg = `<svg viewBox="0 0 ${SIZE} ${SIZE}" width="${px}" height="${px}" xmlns="http://www.w3.org/2000/svg">`;
+  let cursor = 0;
+  FEELINGS_WHEEL.forEach(([coreName, color, mids])=>{
+    const coreA0 = cursor, coreSpan = degPerMid*mids.length, coreA1 = coreA0 + coreSpan;
+    svg += `<path d="${arcPath(rHub, rCore, coreA0, coreA1)}" fill="${color}" stroke="#fff" stroke-width="2"></path>`;
+    let midCursor = coreA0;
+    mids.forEach(([midName, leaves])=>{
+      const midA0 = midCursor, midA1 = midA0 + degPerMid;
+      svg += `<path d="${arcPath(rCore, rMid, midA0, midA1)}" fill="${color}" fill-opacity="0.72" stroke="#fff" stroke-width="1.5"></path>`;
+      const leafW = degPerMid/leaves.length;
+      let leafCursor = midA0;
+      leaves.forEach(leaf=>{
+        const la0 = leafCursor, la1 = la0 + leafW;
+        svg += `<path d="${arcPath(rMid, rLeaf, la0, la1)}" fill="${color}" fill-opacity="0.42" stroke="#fff" stroke-width="1"></path>`;
+        svg += radialLabel(rMid+14, (la0+la1)/2, leaf, 11.5);
+        leafCursor = la1;
+      });
+      svg += radialLabel(rCore+14, (midA0+midA1)/2, midName, 13.5);
+      midCursor = midA1;
     });
-    const midA = a0+30;
-    svg += `<text ${labelAttr((rInner+rMid)/2, midA)} text-anchor="middle" font-size="12.5" font-weight="700" `+
-           `fill="#1a2138" stroke="#fff" stroke-width="3" paint-order="stroke" font-family="Inter,sans-serif">${CATS[cat].emoji} ${CATS[cat].label}</text>`;
-    subs.forEach((name,j)=>{
-      const s0=a0+j*30, s1=s0+30, subMid=(s0+s1)/2;
-      svg += `<text ${labelAttr((rMid+rOuter)/2, subMid)} text-anchor="middle" font-size="9.5" font-weight="600" `+
-             `fill="#1a2138" stroke="#fff" stroke-width="3" paint-order="stroke" font-family="Inter,sans-serif">${name}</text>`;
-    });
+    // Size the core label to the arc it actually has (narrow cores like Bad
+    // and Disgusted only get 4 children -> a much narrower wedge than Happy's
+    // 9, so a fixed font size would get clipped on the narrow ones).
+    const labelR = (rHub+rCore)/2;
+    const arcLen = (coreSpan * Math.PI/180) * labelR;
+    const fitted = arcLen / (coreName.length * 0.62);
+    const coreFont = Math.max(11, Math.min(21, fitted));
+    svg += tangentialLabel(labelR, (coreA0+coreA1)/2, coreName, coreFont);
+    cursor = coreA1;
   });
-  svg += `<circle cx="${cx}" cy="${cy}" r="${rInner-6}" fill="#ffffff"></circle>`;
+  svg += `<circle cx="${cx}" cy="${cy}" r="${rHub-4}" fill="#ffffff"></circle>`;
   svg += `</svg>`;
   return svg;
 }
@@ -1012,10 +1296,10 @@ function renderThanksScreen(){
   const last5 = db.slice(-5);
   const tbody = document.querySelector("#thanks-table tbody");
   tbody.innerHTML = last5.map((r,i)=>{
-    const labelDisplay = r.chosenLabel ? (CATS[r.chosenLabel].emoji+" "+CATS[r.chosenLabel].label) : (r.special === "cannot" ? "🤔 Cannot choose" : "🚫 No emotion");
+    const labelDisplay = r.chosenLabel ? (CATS[r.chosenLabel].emoji+" "+CATS[r.chosenLabel].label) : (r.special === "cannot" ? COPY.specialOptions.cannot : COPY.specialOptions.none);
     return `<tr><td>${i+1}</td><td>${escapeHtml(r.tweetText)}</td><td>${labelDisplay}</td></tr>`;
   }).join("");
-  document.getElementById("thanks-total-note").textContent = `You've labeled ${db.length} tweet${db.length===1?"":"s"} in total so far.`;
+  document.getElementById("thanks-total-note").textContent = fmt(COPY.thanks.totalTemplate, {count: db.length, plural: db.length===1?"":"s"});
   show("screen-thanks");
 }
 document.getElementById("thanks-home-btn").addEventListener("click", ()=> renderHome());
@@ -1036,7 +1320,7 @@ document.getElementById("feedback-submit-btn").addEventListener("click", ()=>{
   db.push({participant: state.participant ? state.participant.id : "anonymous", text, timestamp: new Date().toISOString()});
   saveFeedbackDB(db);
   document.getElementById("feedback-text").value = "";
-  document.getElementById("feedback-confirm").textContent = "Thanks — your feedback was recorded.";
+  document.getElementById("feedback-confirm").textContent = COPY.feedback.confirmMsg;
 });
 
 /* ======================= DATA VIEW ======================= */
@@ -1044,14 +1328,15 @@ function renderDataView(){
   const db = getDB();
   const participants = new Set(db.map(r=>r.participant));
   const stats = document.getElementById("data-stats");
+  const [statLabel1, statLabel2, statLabel3] = COPY.data.statLabels;
   stats.innerHTML = `
-    <div class="stat"><b>${db.length}</b><span>total labels</span></div>
-    <div class="stat"><b>${participants.size}</b><span>participants</span></div>
-    <div class="stat"><b>${new Set(db.map(r=>r.tweetId)).size}</b><span>unique tweets seen</span></div>
+    <div class="stat"><b>${db.length}</b><span>${statLabel1}</span></div>
+    <div class="stat"><b>${participants.size}</b><span>${statLabel2}</span></div>
+    <div class="stat"><b>${new Set(db.map(r=>r.tweetId)).size}</b><span>${statLabel3}</span></div>
   `;
   const tbody = document.querySelector("#data-table tbody");
   tbody.innerHTML = db.slice().reverse().map(r=>{
-    const labelDisplay = r.chosenLabel ? (CATS[r.chosenLabel].emoji+" "+CATS[r.chosenLabel].label) : (r.special === "cannot" ? "Cannot choose" : "No emotion");
+    const labelDisplay = r.chosenLabel ? (CATS[r.chosenLabel].emoji+" "+CATS[r.chosenLabel].label) : (r.special === "cannot" ? COPY.data.cannotChooseLabel : COPY.data.noEmotionLabel);
     return `<tr><td>${escapeHtml(r.participant)}</td><td>${r.tweetId}</td><td>${escapeHtml(r.tweetText)}</td><td>${labelDisplay}</td><td>${new Date(r.timestamp).toLocaleString()}</td></tr>`;
   }).join("");
   show("screen-data");
@@ -1061,7 +1346,7 @@ document.getElementById("export-json-btn").addEventListener("click", ()=>{
   downloadBlob(JSON.stringify(getDB(), null, 2), "emotion-labels-all.json", "application/json");
 });
 document.getElementById("clear-data-btn").addEventListener("click", ()=>{
-  if(confirm("This deletes all collected labels in this browser. Continue?")){
+  if(confirm(COPY.data.clearConfirm)){
     saveDB([]);
     renderDataView();
   }
@@ -1090,8 +1375,98 @@ function downloadBlob(content, filename, mime){
   URL.revokeObjectURL(url);
 }
 
+/* ======================= STATIC COPY INJECTION ======================= */
+// Fills in every static (non-dynamically-rerendered) piece of text from
+// COPY, once, at startup. Screens that redraw themselves each time they're
+// shown (tutorial steps, qualify feedback, task progress, thanks totals,
+// data view rows) already pull straight from COPY inside their own render
+// functions above — this only covers the parts of the page that are set
+// once and never rebuilt.
+function applyStaticCopy(){
+  document.title = COPY.pageTitle;
+
+  document.getElementById("envelope-hint").innerHTML = COPY.landing.envelopeHint;
+  document.getElementById("letter-title").innerHTML = COPY.landing.letterTitle;
+  document.getElementById("letter-body").innerHTML = COPY.landing.letterParagraphs.map(p=>`<p>${p}</p>`).join("");
+  document.getElementById("continue-btn").innerHTML = COPY.landing.continueBtn;
+
+  document.getElementById("nav-brand").innerHTML = COPY.nav.brand;
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    const key = btn.dataset.nav;
+    if(COPY.nav[key] !== undefined){ btn.innerHTML = COPY.nav[key]; }
+  });
+
+  document.getElementById("home-tag").innerHTML = COPY.home.tag;
+  document.getElementById("home-title").innerHTML = COPY.home.title;
+  document.getElementById("home-subtitle").innerHTML = COPY.home.subtitle;
+  document.getElementById("home-tweet-author").innerHTML = COPY.tweetAuthor;
+  document.getElementById("home-sample-tweet-text").innerHTML = `"${COPY.home.sampleTweetText}"`;
+  document.getElementById("start-classify-btn").innerHTML = COPY.home.startBtn;
+
+  document.getElementById("id-heading").innerHTML = COPY.idScreen.heading;
+  document.getElementById("id-body").innerHTML = COPY.idScreen.body;
+  document.getElementById("id-label").innerHTML = COPY.idScreen.label;
+  document.getElementById("participant-input").placeholder = COPY.idScreen.placeholder;
+  document.getElementById("id-hint").innerHTML = COPY.idScreen.hint;
+  document.getElementById("id-continue-btn").innerHTML = COPY.idScreen.continueBtn;
+
+  document.getElementById("tut-back-btn").innerHTML = COPY.tutorial.backBtn;
+  document.getElementById("tut-next-btn").innerHTML = COPY.tutorial.nextBtn;
+
+  document.getElementById("qualify-tag").innerHTML = COPY.qualify.tag;
+  document.getElementById("qualify-heading").innerHTML = COPY.qualify.heading;
+  document.getElementById("qualify-instructions").innerHTML = COPY.qualify.instructions;
+  document.getElementById("qualify-tweet-author").innerHTML = COPY.tweetAuthor;
+  document.getElementById("qualify-start-btn").innerHTML = COPY.qualify.startBtn;
+
+  document.getElementById("task-progress-label").innerHTML = fmt(COPY.task.progressTemplate, {n:1, total:5});
+  document.getElementById("task-tweet-author").innerHTML = COPY.tweetAuthor;
+  document.getElementById("wheel-btn").innerHTML = COPY.task.wheelBtn;
+  document.getElementById("save-quit-btn").innerHTML = COPY.task.saveQuitBtn;
+  document.getElementById("exit-btn").innerHTML = COPY.task.exitBtn;
+  document.getElementById("task-next-btn").innerHTML = COPY.task.nextBtn;
+
+  document.getElementById("thanks-tag").innerHTML = COPY.thanks.tag;
+  document.getElementById("thanks-heading").innerHTML = COPY.thanks.heading;
+  document.getElementById("thanks-body").innerHTML = COPY.thanks.body;
+  COPY.thanks.tableHeaders.forEach((h,i)=>{ document.getElementById("thanks-th-"+i).innerHTML = h; });
+  document.getElementById("thanks-download-btn").innerHTML = COPY.thanks.downloadBtn;
+  document.getElementById("thanks-more-btn").innerHTML = COPY.thanks.moreBtn;
+  document.getElementById("thanks-home-btn").innerHTML = COPY.thanks.homeBtn;
+
+  document.getElementById("about-heading").innerHTML = COPY.about.heading;
+  document.getElementById("about-intro").innerHTML = COPY.about.intro;
+  document.getElementById("about-emotions-heading").innerHTML = COPY.about.emotionsHeading;
+  document.getElementById("about-emo-strip").innerHTML = CAT_ORDER.map(c=>{
+    const d = CATS[c];
+    return `<span class="emo-chip" style="background:${d.color};">${d.emoji} ${d.label}</span>`;
+  }).join("");
+  document.getElementById("about-source-heading").innerHTML = COPY.about.sourceHeading;
+  document.getElementById("about-source-body").innerHTML = COPY.about.sourceBody;
+  document.getElementById("about-note-heading").innerHTML = COPY.about.noteHeading;
+  document.getElementById("about-note-body").innerHTML = COPY.about.noteBody;
+  document.getElementById("about-citation").innerHTML = COPY.about.citation;
+
+  document.getElementById("feedback-heading").innerHTML = COPY.feedback.heading;
+  document.getElementById("feedback-prompt").innerHTML = COPY.feedback.prompt;
+  document.getElementById("feedback-text").placeholder = COPY.feedback.placeholder;
+  document.getElementById("feedback-submit-btn").innerHTML = COPY.feedback.submitBtn;
+
+  document.getElementById("data-heading").innerHTML = COPY.data.heading;
+  document.getElementById("data-intro").innerHTML = COPY.data.intro;
+  document.getElementById("export-csv-btn").innerHTML = COPY.data.csvBtn;
+  document.getElementById("export-json-btn").innerHTML = COPY.data.jsonBtn;
+  document.getElementById("clear-data-btn").innerHTML = COPY.data.clearBtn;
+  COPY.data.tableHeaders.forEach((h,i)=>{ document.getElementById("data-th-"+i).innerHTML = h; });
+  document.getElementById("data-footer-note").innerHTML = COPY.data.footerNote;
+
+  document.getElementById("wheel-modal-title").innerHTML = COPY.wheelModal.title;
+  document.getElementById("wheel-modal-body").innerHTML = COPY.wheelModal.body;
+}
+
 /* ======================= INIT ======================= */
-document.getElementById("wheel-graphic").innerHTML = buildEmotionWheelSVG(230);
+applyStaticCopy();
+document.getElementById("wheel-graphic").innerHTML = buildEmotionWheelSVG(780);
 show("screen-landing");
 </script>
 </body>
