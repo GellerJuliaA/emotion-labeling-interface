@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Emotion Project — Tweet Labeling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#0b1330;
+  --bg-deep2:#111c42;
+  --panel:#ffffff;
+  --panel-soft:#f3f5fb;
+  --ink:#171f38;
+  --ink-soft:#5b6480;
+  --line:#e3e6f0;
+  --cta:#2fb8a6;
+  --cta-dark:#22947f;
+  --gold:#f2b84b;
+  --anger:#e0533f;
+  --fear:#7c5cd6;
+  --joy:#eab308;
+  --love:#e0578f;
+  --sadness:#3f7cac;
+  --surprise:#ff8f5e;
+  --radius:16px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg-deep);
+  color:var(--ink);
+  min-height:100vh;
+}
+h1,h2,h3,.display{
+  font-family:'Fraunces',serif;
+  color:var(--ink);
+  line-height:1.15;
+}
+button{font-family:inherit; cursor:pointer;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ---------- NAV ---------- */
+#navbar{
+  display:none;
+  position:sticky; top:0; z-index:40;
+  background:var(--bg-deep2);
+  padding:14px 24px;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+#navbar.show{display:flex;}
+.brand{color:#fff; font-family:'Fraunces',serif; font-weight:600; font-size:18px; letter-spacing:0.2px; display:flex; align-items:center; gap:8px;}
+.brand-dot{width:9px;height:9px;border-radius:50%;background:var(--gold);display:inline-block;}
+.nav-links{display:flex; gap:6px;}
+.nav-btn{
+  background:transparent; border:none; color:#c7cde2; padding:8px 14px;
+  border-radius:999px; font-size:14px; font-weight:600;
+}
+.nav-btn:hover{color:#fff;}
+.nav-btn.active{background:rgba(255,255,255,0.1); color:#fff;}
+
+/* ---------- LAYOUT WRAPPERS ---------- */
+.page-wrap{max-width:760px; margin:0 auto; padding:40px 24px 80px;}
+.center-wrap{max-width:760px; margin:0 auto; padding:40px 24px 80px; display:flex; flex-direction:column; align-items:center; text-align:center;}
+
+.card{
+  background:var(--panel);
+  border-radius:var(--radius);
+  padding:32px;
+  box-shadow:0 20px 50px -25px rgba(10,15,40,0.5);
+}
+
+/* ---------- LANDING ---------- */
+#screen-landing{
+  min-height:100vh;
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(1px 1px at 10% 20%, #fff, transparent),
+    radial-gradient(1px 1px at 80% 10%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 60% 30%, #fff, transparent),
+    radial-gradient(1px 1px at 30% 60%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 90% 70%, #fff, transparent),
+    radial-gradient(1px 1px at 45% 80%, #fff, transparent),
+    radial-gradient(1px 1px at 20% 90%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 70% 50%, #fff, transparent),
+    linear-gradient(180deg, #0a1230 0%, #16225a 60%, #1c2c6b 100%);
+  display:flex; align-items:center; justify-content:center;
+  text-align:center;
+}
+.moon{
+  position:absolute; top:60px; right:70px; width:70px; height:70px; border-radius:50%;
+  background:#fbeecb; box-shadow:0 0 50px 10px rgba(251,238,203,0.35);
+}
+.landing-inner{position:relative; z-index:2; color:#fff; padding:24px;}
+.envelope{
+  width:180px; height:120px; margin:0 auto 28px; position:relative; cursor:pointer;
+  transition:transform .25s ease;
+}
+.envelope:hover{transform:translateY(-4px);}
+.envelope-body{
+  position:absolute; inset:0; background:#f4ead1; border-radius:6px;
+  box-shadow:0 18px 40px -12px rgba(0,0,0,0.55);
+}
+.envelope-flap{
+  position:absolute; top:0; left:0; width:100%; height:0; border-left:90px solid transparent;
+  border-right:90px solid transparent; border-top:62px solid #e3d3a6;
+  transform-origin:top; transition:transform .5s cubic-bezier(.4,.2,.2,1);
+}
+.envelope.open .envelope-flap{transform:rotateX(180deg);}
+.envelope-seal{
+  position:absolute; top:44px; left:50%; transform:translateX(-50%); width:26px; height:26px;
+  border-radius:50%; background:#b5433a; box-shadow:0 2px 4px rgba(0,0,0,0.4);
+}
+.envelope-hint{font-size:13px; letter-spacing:0.5px; text-transform:uppercase; opacity:0.85; margin-top:6px;}
+.letter{
+  display:none; max-width:480px; background:#fbf6e9; color:#2c2410; border-radius:10px;
+  padding:36px 32px; box-shadow:0 30px 60px -20px rgba(0,0,0,0.6); text-align:left;
+  font-family:'Fraunces',serif; font-size:17px; line-height:1.6;
+}
+.letter.show{display:block; animation:fadeUp .6s ease;}
+@keyframes fadeUp{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+.letter-title{font-size:22px; font-weight:700; margin-bottom:14px;}
+#continue-btn{margin-top:22px;}
+
+/* ---------- BUTTONS ---------- */
+.btn{
+  border:none; border-radius:999px; padding:13px 26px; font-size:15px; font-weight:700;
+  display:inline-flex; align-items:center; gap:8px;
+}
+.btn-primary{background:var(--cta); color:#fff;}
+.btn-primary:hover{background:var(--cta-dark);}
+.btn-ghost{background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,0.5);}
+.btn-ghost:hover{border-color:#fff;}
+.btn-outline{background:transparent; color:var(--ink); border:1.5px solid var(--line);}
+.btn-outline:hover{border-color:var(--ink);}
+.btn-small{padding:8px 16px; font-size:13px; border-radius:999px;}
+.btn:disabled{opacity:0.4; cursor:not-allowed;}
+
+/* ---------- HOME ---------- */
+.tag{
+  display:inline-block; background:rgba(47,184,166,0.12); color:var(--cta-dark);
+  font-weight:700; font-size:12.5px; letter-spacing:0.6px; text-transform:uppercase;
+  padding:6px 12px; border-radius:999px; margin-bottom:16px;
+}
+.hero-title{font-size:38px; margin:0 0 14px;}
+.hero-sub{color:var(--ink-soft); font-size:16.5px; line-height:1.6; max-width:560px; margin:0 auto 26px;}
+.sample-tweet{
+  background:var(--panel-soft); border-radius:14px; padding:18px 20px; text-align:left;
+  max-width:420px; margin:0 auto 30px; border:1px solid var(--line);
+}
+.tweet-author{display:flex; align-items:center; gap:10px; font-weight:700; font-size:14px; margin-bottom:8px;}
+.tweet-avatar{width:30px; height:30px; border-radius:50%; background:var(--sadness); display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px;}
+.tweet-text{font-size:15px; line-height:1.5; color:var(--ink);}
+.resume-banner{
+  background:#fff7e6; border:1px solid #f1d9a3; color:#7a5b12; border-radius:12px;
+  padding:14px 18px; margin-bottom:24px; font-size:14.5px; display:flex; align-items:center;
+  justify-content:space-between; gap:14px; max-width:560px;
+}
+
+/* ---------- ID FORM ---------- */
+.id-form{max-width:380px; margin:0 auto; text-align:left;}
+.id-form label{display:block; font-weight:600; font-size:14px; margin-bottom:8px;}
+.id-form input{
+  width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--line);
+  font-size:15px; margin-bottom:6px;
+}
+.id-form .hint{color:var(--ink-soft); font-size:12.5px; margin-bottom:18px;}
+
+/* ---------- TUTORIAL ---------- */
+.tut-progress{display:flex; gap:6px; justify-content:center; margin-bottom:22px;}
+.tut-dot{width:8px; height:8px; border-radius:50%; background:var(--line);}
+.tut-dot.done{background:var(--cta);}
+.tut-dot.now{background:var(--gold);}
+.tut-body h2{font-size:24px; margin-top:0;}
+.tut-body p{color:var(--ink-soft); font-size:15.5px; line-height:1.65;}
+.tut-nav{display:flex; justify-content:space-between; margin-top:28px;}
+
+.def-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:18px; text-align:left;}
+@media(max-width:640px){.def-grid{grid-template-columns:1fr;}}
+.def-card{border-radius:12px; padding:14px 16px; border:1.5px solid var(--line);}
+.def-emoji{font-size:24px; margin-bottom:6px;}
+.def-name{font-weight:700; font-size:15px; margin-bottom:4px;}
+.def-text{font-size:13.5px; color:var(--ink-soft); line-height:1.5;}
+
+.example-box{
+  background:var(--panel-soft); border-radius:12px; padding:18px 20px; margin:18px 0; text-align:left;
+  border:1px solid var(--line);
+}
+.example-label{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--ink-soft); margin-bottom:8px;}
+.example-tags{margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;}
+.pill{padding:5px 12px; border-radius:999px; font-size:12.5px; font-weight:700; color:#fff;}
+
+.wheel-wrap{display:flex; flex-direction:column; align-items:center; margin:20px 0;}
+.wheel{
+  width:220px; height:220px; border-radius:50%; position:relative;
+  background:conic-gradient(
+    var(--anger) 0 60deg, var(--fear) 60deg 120deg, var(--joy) 120deg 180deg,
+    var(--love) 180deg 240deg, var(--sadness) 240deg 300deg, var(--surprise) 300deg 360deg
+  );
+  box-shadow:0 12px 30px -12px rgba(0,0,0,0.35);
+}
+.wheel-label{
+  position:absolute; top:50%; left:50%; width:70px; text-align:center; font-size:11.5px; font-weight:700;
+  color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.35);
+}
+
+/* ---------- QUALIFY ---------- */
+.feedback-panel{border-radius:12px; padding:16px 18px; margin-top:18px; text-align:left; font-size:14.5px; line-height:1.55;}
+.feedback-panel.correct{background:#e9f9f1; color:#1c6b46; border:1px solid #b7e5cc;}
+.feedback-panel.incorrect{background:#fdeeee; color:#8a2f2f; border:1px solid #f3c3c3;}
+
+/* ---------- TASK ---------- */
+#task-topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;}
+.progress-label{color:#c7cde2; font-size:13.5px; font-weight:600;}
+.progress-track{background:rgba(255,255,255,0.12); border-radius:999px; height:6px; width:160px; overflow:hidden; margin-top:6px;}
+.progress-fill{background:var(--gold); height:100%; border-radius:999px; transition:width .3s ease;}
+.topbar-actions{display:flex; gap:8px;}
+
+.tweet-card{
+  background:var(--panel); border-radius:20px; padding:34px; text-align:center; margin-bottom:26px;
+  box-shadow:0 20px 50px -25px rgba(10,15,40,0.5);
+}
+.tweet-card .tweet-text{font-size:21px; font-family:'Fraunces',serif; color:var(--ink); line-height:1.5;}
+.tweet-card .tweet-author{justify-content:center; margin-bottom:16px;}
+
+.option-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:14px;}
+@media(max-width:640px){.option-grid{grid-template-columns:repeat(2,1fr);}}
+.opt-btn{
+  border-radius:14px; border:2px solid var(--line); background:#fff; padding:16px 10px;
+  display:flex; flex-direction:column; align-items:center; gap:6px; font-weight:700; font-size:14px; color:var(--ink);
+}
+.opt-btn .opt-emoji{font-size:24px;}
+.opt-btn:hover{border-color:var(--hover-color, var(--ink));}
+.opt-btn.selected{border-color:var(--gold); background:#fffaef; box-shadow:0 0 0 3px rgba(242,184,75,0.25);}
+.special-row{display:flex; gap:12px; margin-bottom:20px;}
+.special-row .opt-btn{flex:1; flex-direction:row; justify-content:center; padding:13px;}
+
+.task-footer{display:flex; justify-content:flex-end;}
+
+/* ---------- ABOUT / GENERIC CONTENT ---------- */
+.content-card{background:var(--panel); border-radius:20px; padding:36px; box-shadow:0 20px 50px -25px rgba(10,15,40,0.5);}
+.content-card h2{font-size:26px; margin-top:0;}
+.content-card p{color:var(--ink-soft); font-size:15.5px; line-height:1.7;}
+.content-card h3{font-size:16px; margin-bottom:6px;}
+.emo-strip{display:flex; gap:10px; flex-wrap:wrap; margin:18px 0;}
+.emo-chip{padding:7px 14px; border-radius:999px; color:#fff; font-size:13px; font-weight:700;}
+.cite-box{background:var(--panel-soft); border-left:3px solid var(--cta); padding:14px 18px; border-radius:8px; font-size:13.5px; color:var(--ink-soft); margin-top:20px;}
+
+/* ---------- FEEDBACK ---------- */
+textarea{
+  width:100%; min-height:130px; border-radius:12px; border:1.5px solid var(--line); padding:14px;
+  font-family:inherit; font-size:14.5px; resize:vertical;
+}
+
+/* ---------- DATA VIEW ---------- */
+table{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:16px;}
+th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--line);}
+th{color:var(--ink-soft); font-size:12px; text-transform:uppercase; letter-spacing:0.4px;}
+.data-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;}
+.stat-row{display:flex; gap:20px; margin:18px 0; flex-wrap:wrap;}
+.stat{background:var(--panel-soft); border-radius:12px; padding:14px 18px; min-width:110px;}
+.stat b{display:block; font-size:22px; font-family:'Fraunces',serif;}
+.stat span{font-size:12px; color:var(--ink-soft);}
+
+.small-note{color:var(--ink-soft); font-size:13px; margin-top:14px;}
+.footer-note{text-align:center; color:#8890ac; font-size:12.5px; margin-top:36px;}
+.link-btn{background:none; border:none; color:var(--cta); font-weight:700; font-size:13.5px; padding:0; text-decoration:underline; cursor:pointer;}
+</style>
+</head>
+<body>
+
+<!-- ============ LANDING ============ -->
+<section id="screen-landing" class="screen active">
+  <div class="moon"></div>
+  <div class="landing-inner">
+    <div id="envelope" class="envelope">
+      <div class="envelope-body"></div>
+      <div class="envelope-flap"></div>
+      <div class="envelope-seal"></div>
+    </div>
+    <div class="envelope-hint" id="envelope-hint">Click to open</div>
+    <div id="letter" class="letter">
+      <div class="letter-title">Welcome to the Label Zone!</div>
+      <p>Here, you will help researchers in essential projects that rely on <em>your</em> work. You will help label a dataset with different emotions, to help researchers study how emotion shows up in everyday language.</p>
+      <p>It only takes about five minutes. Ready?</p>
+      <button class="btn btn-primary" id="continue-btn">Continue →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ NAV ============ -->
+<nav id="navbar">
+  <div class="brand"><span class="brand-dot"></span> The Emotion Project</div>
+  <div class="nav-links">
+    <button class="nav-btn" data-nav="home">Home</button>
+    <button class="nav-btn" data-nav="classify">Classify</button>
+    <button class="nav-btn" data-nav="about">About</button>
+    <button class="nav-btn" data-nav="feedback">Give Feedback</button>
+    <button class="nav-btn" data-nav="data">Data</button>
+  </div>
+</nav>
+
+<!-- ============ HOME ============ -->
+<section id="screen-home" class="screen">
+  <div class="center-wrap">
+    <div id="resume-banner-slot"></div>
+    <span class="tag">Research Task · ~5 minutes</span>
+    <h1 class="hero-title">The Emotion Project</h1>
+    <p class="hero-sub">The goal of this project is to build a high-quality, human-labeled dataset of tweets tagged by the emotion they express. Your labels help researchers study how people express emotion in short, informal text. When you're ready, hit classify below!</p>
+    <div class="sample-tweet">
+      <div class="tweet-author"><span class="tweet-avatar">🐦</span> @anon_user</div>
+      <div class="tweet-text">"i am now nearly finished the week detox and i feel amazing"</div>
+    </div>
+    <button class="btn btn-primary" id="start-classify-btn">Classify →</button>
+  </div>
+</section>
+
+<!-- ============ PARTICIPANT ID ============ -->
+<section id="screen-id" class="screen">
+  <div class="center-wrap">
+    <div class="card" style="text-align:left; max-width:420px;">
+      <h2 style="margin-top:0;">Before we start</h2>
+      <p style="color:var(--ink-soft); font-size:14.5px; margin-bottom:20px;">Enter a name or alias so we can keep track of which tweets you've labeled. This can be anything — it doesn't need to be your real name.</p>
+      <div class="id-form">
+        <label for="participant-input">Your name or alias</label>
+        <input id="participant-input" type="text" placeholder="e.g. annotator_07" maxlength="40">
+        <div class="hint">This is stored only in your browser, alongside your labels.</div>
+        <button class="btn btn-primary" id="id-continue-btn" style="width:100%; justify-content:center;">Continue →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TUTORIAL ============ -->
+<section id="screen-tutorial" class="screen">
+  <div class="page-wrap">
+    <div class="tut-progress" id="tut-progress"></div>
+    <div class="card tut-body" id="tut-body"></div>
+    <div class="tut-nav">
+      <button class="btn btn-outline" id="tut-back-btn">← Back</button>
+      <button class="btn btn-primary" id="tut-next-btn">Next →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUALIFY ============ -->
+<section id="screen-qualify" class="screen">
+  <div class="page-wrap">
+    <div class="card">
+      <span class="tag">Quick Check</span>
+      <h2 style="margin-top:10px;">Let's try one together</h2>
+      <p style="color:var(--ink-soft); font-size:15px;">Read the tweet below and pick the emotion that's most being expressed. This one won't count toward your 5 real tweets — it's just so we know the tool makes sense to you.</p>
+      <div class="tweet-card" style="margin-top:18px;">
+        <div class="tweet-author"><span class="tweet-avatar">🐦</span> @anon_user</div>
+        <div class="tweet-text" id="qualify-text"></div>
+      </div>
+      <div class="option-grid" id="qualify-options"></div>
+      <div class="special-row" id="qualify-special"></div>
+      <div id="qualify-feedback"></div>
+      <div class="task-footer">
+        <button class="btn btn-primary" id="qualify-start-btn" style="display:none;">Start Labeling →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TASK ============ -->
+<section id="screen-task" class="screen">
+  <div class="page-wrap">
+    <div id="task-topbar">
+      <div>
+        <div class="progress-label" id="task-progress-label">Tweet 1 of 5</div>
+        <div class="progress-track"><div class="progress-fill" id="task-progress-fill" style="width:20%;"></div></div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-small" id="wheel-btn" style="color:#fff; border-color:rgba(255,255,255,0.4);">🎨 Emotion Wheel</button>
+        <button class="btn btn-outline btn-small" id="save-quit-btn">Save &amp; Quit</button>
+        <button class="btn btn-outline btn-small" id="exit-btn">Exit</button>
+      </div>
+    </div>
+    <div class="tweet-card">
+      <div class="tweet-author"><span class="tweet-avatar">🐦</span> @anon_user</div>
+      <div class="tweet-text" id="task-tweet-text"></div>
+    </div>
+    <div class="option-grid" id="task-options"></div>
+    <div class="special-row" id="task-special"></div>
+    <div class="task-footer">
+      <button class="btn btn-primary" id="task-next-btn" disabled>Next →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THANK YOU ============ -->
+<section id="screen-thanks" class="screen">
+  <div class="page-wrap">
+    <div class="content-card" style="text-align:center;">
+      <span class="tag">All done</span>
+      <h2>Thank you for labeling!</h2>
+      <p>Here's what you submitted. Feel free to screenshot this for your records.</p>
+      <table id="thanks-table"><thead><tr><th>#</th><th>Tweet</th><th>Your label</th></tr></thead><tbody></tbody></table>
+      <div class="data-actions" style="justify-content:center;">
+        <button class="btn btn-outline btn-small" id="thanks-download-btn">Download my responses (CSV)</button>
+        <button class="btn btn-primary btn-small" id="thanks-home-btn">Back to Home</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT ============ -->
+<section id="screen-about" class="screen">
+  <div class="page-wrap">
+    <div class="content-card">
+      <h2>About this project</h2>
+      <p>The Emotion Project asks volunteers to read short tweets and label the emotion most clearly expressed in each one. Your labels — combined with everyone else's — form a dataset researchers can use to study how emotion is expressed in informal, everyday text.</p>
+      <h3>The six emotions</h3>
+      <div class="emo-strip">
+        <span class="emo-chip" style="background:var(--anger);">😠 Anger</span>
+        <span class="emo-chip" style="background:var(--fear);">😨 Fear</span>
+        <span class="emo-chip" style="background:var(--joy);">😄 Joy</span>
+        <span class="emo-chip" style="background:var(--love);">🥰 Love</span>
+        <span class="emo-chip" style="background:var(--sadness);">😢 Sadness</span>
+        <span class="emo-chip" style="background:var(--surprise);">😲 Surprise</span>
+      </div>
+      <h3>Where the tweets come from</h3>
+      <p>The tweets in this task are drawn from the publicly available <strong>Emotion</strong> dataset (Saravia et al., 2018), hosted on Hugging Face at <em>dair-ai/emotion</em>. It contains English-language tweets originally labeled with one of six basic emotions.</p>
+      <h3>A note on this kind of work</h3>
+      <p>It's worth naming honestly: using AI or automated systems to classify human emotion from text is a genuinely debated practice — text alone often under-determines what someone actually feels, and automated emotion inference has real risks of misuse. This task exists to produce careful <em>human</em> judgments, and to make the difficulty of the task (ambiguity, missing context, multiple plausible readings) visible rather than papered over.</p>
+      <div class="cite-box">Saravia, E., Liu, H-C. T., Huang, Y-H., Wu, J., &amp; Chen, Y-S. (2018). CARER: Contextualized Affect Representations for Emotion Recognition. <em>Proceedings of EMNLP 2018.</em></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEEDBACK ============ -->
+<section id="screen-feedback" class="screen">
+  <div class="page-wrap">
+    <div class="content-card">
+      <h2>Give feedback</h2>
+      <p>Something confusing? A tweet that didn't fit any category? Let us know.</p>
+      <textarea id="feedback-text" placeholder="Type your feedback here..."></textarea>
+      <div style="margin-top:14px;">
+        <button class="btn btn-primary" id="feedback-submit-btn">Submit feedback</button>
+      </div>
+      <div id="feedback-confirm" class="small-note"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DATA (RESEARCHER VIEW) ============ -->
+<section id="screen-data" class="screen">
+  <div class="page-wrap">
+    <div class="content-card">
+      <h2>Collected data (this browser)</h2>
+      <p style="margin-bottom:0;">This view shows every label submitted from this browser — it's meant for testing and for the instructor to review, not a live multi-device database. Each row records <strong>who</strong> labeled <strong>which tweet</strong> with <strong>which label</strong>.</p>
+      <div class="stat-row" id="data-stats"></div>
+      <div class="data-actions">
+        <button class="btn btn-outline btn-small" id="export-csv-btn">Download all data (CSV)</button>
+        <button class="btn btn-outline btn-small" id="export-json-btn">Download all data (JSON)</button>
+        <button class="btn btn-ghost btn-small" id="clear-data-btn" style="color:var(--anger); border-color:var(--anger);">Clear all data</button>
+      </div>
+      <table id="data-table"><thead><tr><th>Participant</th><th>Tweet ID</th><th>Tweet</th><th>Label</th><th>Time</th></tr></thead><tbody></tbody></table>
+      <div class="small-note">Data lives in this browser's local storage only. Clearing browser data, or opening the site in a different browser/device, starts a fresh store.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHEEL MODAL ============ -->
+<div id="wheel-modal" style="display:none; position:fixed; inset:0; background:rgba(11,19,48,0.7); z-index:100; align-items:center; justify-content:center;">
+  <div class="card" style="max-width:340px; text-align:center; position:relative;">
+    <button id="wheel-close-btn" style="position:absolute; top:14px; right:16px; background:none; border:none; font-size:18px; cursor:pointer; color:var(--ink-soft);">✕</button>
+    <h3 style="margin-top:0;">The Emotion Wheel</h3>
+    <p style="color:var(--ink-soft); font-size:13.5px;">If a tweet expresses a narrower emotion, use this wheel to find its closest parent category among our six.</p>
+    <div class="wheel-wrap">
+      <div class="wheel" id="wheel-graphic"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ======================= DATA ======================= */
+const CATS = {
+  anger:    {label:"Anger",    emoji:"😠", color:"var(--anger)",    def:"A strong feeling of displeasure, annoyance, or hostility caused by a perceived wrong, unfairness, or threat."},
+  fear:     {label:"Fear",     emoji:"😨", color:"var(--fear)",     def:"A powerful, distressing emotion felt when sensing danger, pain, or a real or imagined threat."},
+  joy:      {label:"Joy",      emoji:"😄", color:"var(--joy)",      def:"A powerful, positive feeling sparked by well-being, success, or delight."},
+  love:     {label:"Love",     emoji:"🥰", color:"var(--love)",     def:"A strong feeling of deep affection, care, and emotional attachment to another person, place, or thing."},
+  sadness:  {label:"Sadness",  emoji:"😢", color:"var(--sadness)",  def:"A state of unhappiness, sorrow, and emotional pain."},
+  surprise: {label:"Surprise", emoji:"😲", color:"var(--surprise)", def:"The feeling that comes from something unexpected — an event you did not plan for or expect."},
+};
+const CAT_ORDER = ["anger","fear","joy","love","sadness","surprise"];
+
+// Curated from the dair-ai/emotion dataset (Hugging Face). Ground-truth label kept
+// for research reference only — it is never shown to the participant during labeling.
+const TWEETS = [
+  {id:"S1",text:"i didnt feel humiliated",cat:"sadness"},
+  {id:"S2",text:"i can go from feeling so hopeless to so damned hopeful just from being around someone who cares and is awake",cat:"sadness"},
+  {id:"S3",text:"ive been feeling a little burdened lately, wasnt sure why that was",cat:"sadness"},
+  {id:"S4",text:"i didnt really feel that embarrassed",cat:"sadness"},
+  {id:"S5",text:"i feel pretty pathetic most of the time",cat:"sadness"},
+  {id:"S6",text:"i started feeling sentimental about dolls i had as a child, and so began a collection of vintage barbie dolls from the sixties",cat:"sadness"},
+  {id:"S7",text:"i become overwhelmed and feel defeated",cat:"sadness"},
+  {id:"S8",text:"i found myself feeling a little discouraged that morning",cat:"sadness"},
+  {id:"S9",text:"i feel so sad and hopeless",cat:"sadness"},
+  {id:"S10",text:"i still feel groggy, but i have to get up to do the routine for my son",cat:"sadness"},
+  {id:"J1",text:"i have been with petronas for years, i feel that petronas has performed well and made a huge profit",cat:"joy"},
+  {id:"J2",text:"i feel very happy and excited since i learned so many things",cat:"joy"},
+  {id:"J3",text:"i workout every morning before and feel fabulous for it",cat:"joy"},
+  {id:"J4",text:"i am feeling all useful",cat:"joy"},
+  {id:"J5",text:"i feel honoured to have been able to call them friends, to share their brotherhood",cat:"joy"},
+  {id:"J6",text:"i feel completely honored to be an influence to this young, talented, fully alive, beautiful girl",cat:"joy"},
+  {id:"J7",text:"i remember feeling inspired and thinking that it was a fine example of parenting",cat:"joy"},
+  {id:"J8",text:"i really feel that my life is perfect right now, and i just hope that everything would stay the same",cat:"joy"},
+  {id:"J9",text:"i hope to feel a bit more creative again soon, and miss its presence in my life",cat:"joy"},
+  {id:"J10",text:"ive lost some weight, such that i could fit into a tiny skirt i was unable to wear because i didnt feel confident in it until now",cat:"joy"},
+  {id:"L1",text:"i am ever feeling nostalgic about the fireplace, i will know that it is still on the property",cat:"love"},
+  {id:"L2",text:"i feel romantic too",cat:"love"},
+  {id:"L3",text:"i was ready to meet mom in the airport and feel her ever supportive arms around me",cat:"love"},
+  {id:"L4",text:"i talk to dogs, as i feel they cannot understand words but they can read emotions and know how to be supportive",cat:"love"},
+  {id:"L5",text:"i suppose my own truth needs to be shared, i havent been feeling very faithful lately, ive dwelled more in doubt and uncertainty than i have in faith",cat:"love"},
+  {id:"L6",text:"i wont let my child cry it out, because i feel that loving her when she was little was going to be an opportunity that only lasted a few short months",cat:"love"},
+  {id:"L7",text:"i am very excited to finally meet that companion who will be with me at all times, especially when i am lonely, and who will make me feel loved",cat:"love"},
+  {id:"L8",text:"i called it god, because i had seen god in a book and figured god was the right name for feeling so utterly affirmed and accepted without question",cat:"love"},
+  {id:"L9",text:"i ate, and could feel a gentle tingle throughout, almost as if i was feeling the healing taking place at a cellular level",cat:"love"},
+  {id:"A1",text:"im grabbing a minute to post, i feel greedy wrong",cat:"anger"},
+  {id:"A2",text:"i climbed the hill feeling frustrated that id paced entirely wrong for this course, and that a factor that has never hampered me had made such a dent in the day",cat:"anger"},
+  {id:"A3",text:"i think its the easiest time of year to feel dissatisfied",cat:"anger"},
+  {id:"A4",text:"i feel irritated and rejected, without anyone doing anything or saying anything",cat:"anger"},
+  {id:"A5",text:"i feel kinda appalled that she feels like she needs to explain, in wide length, her body measurements",cat:"anger"},
+  {id:"A6",text:"i feel angered and fiery",cat:"anger"},
+  {id:"A7",text:"i know the pain parents feel when an enraged child becomes violent",cat:"anger"},
+  {id:"A8",text:"i wanted to get a pumpkin spice latte this morning, but it was hot and the last thing i wanted was a hot coffee, so maybe i am feeling a little bitter",cat:"anger"},
+  {id:"A9",text:"i just feel really annoyed right now",cat:"anger"},
+  {id:"A10",text:"im sure its because when i am lost i feel like everyone is being hostile toward me, and i hate that feeling",cat:"anger"},
+  {id:"F1",text:"i feel as confused about life as a teenager, or as jaded as a year-old man",cat:"fear"},
+  {id:"F2",text:"i now feel compromised and skeptical of the value of every unit of work i put in",cat:"fear"},
+  {id:"F3",text:"i am feeling completely overwhelmed, i have two strategies that help me feel grounded: pour my heart out in a journal, then list five things i am most grateful for",cat:"fear"},
+  {id:"F4",text:"i remember feeling acutely distressed for a few days",cat:"fear"},
+  {id:"F5",text:"i will be able to lay on my bed in the dark and not feel terrified, at least for a while",cat:"fear"},
+  {id:"F6",text:"i had begun to feel apprehensive when thick black rain clouds stormed into the sky above town",cat:"fear"},
+  {id:"F7",text:"i remember feeling really terrified when i was in brazil, on a bus going up steep mountain hills in the middle of a big storm, wondering if we were going to fall off",cat:"fear"},
+  {id:"F8",text:"i feel vulnerable and alone",cat:"fear"},
+  {id:"F9",text:"i think im just being stupid, feeling nervous",cat:"fear"},
+  {id:"F10",text:"im getting the feeling that my classes are a little intimidated by the concept of a lit",cat:"fear"},
+  {id:"U1",text:"i have seen, heard, and read over the past couple of days, and am left feeling impressed by more than a few companies",cat:"surprise"},
+  {id:"U2",text:"i keep feeling pleasantly surprised at his supportiveness and also his ease in new situations",cat:"surprise"},
+  {id:"U3",text:"i am now nearly finished the week detox and i feel amazing",cat:"surprise"},
+  {id:"U4",text:"i want to hold this feeling of shocked awe and wonder forever",cat:"surprise"},
+  {id:"U5",text:"i was feeling an act of god at work in my life, and it was an amazing feeling",cat:"surprise"},
+  {id:"U6",text:"i too feel as if i am a stranger in a strange land, raising my son in a place that is not his father's ancestral home",cat:"surprise"},
+  {id:"U7",text:"i started feeling funny, and then friday i woke up sick as a dog",cat:"surprise"},
+  {id:"U8",text:"her verses left me feeling curious to hear more of the odd couple's story",cat:"surprise"},
+];
+
+const QUALIFY_TWEET = {id:"Q1", text:"i am feeling grouchy", cat:"anger"};
+const TUT_MULTI = {text:"omg i cannot believe you flew all the way across the country just to surprise me for our anniversary — i love you so much", cats:["love","surprise"]};
+const TUT_NONE = {text:"the city council meeting has been rescheduled to 3pm on thursday", cats:[]};
+
+/* ======================= STORAGE HELPERS ======================= */
+const NS = "emoLab_";
+function lsGet(key, fallback){ try{ const v = localStorage.getItem(NS+key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; } }
+function lsSet(key, val){ try{ localStorage.setItem(NS+key, JSON.stringify(val)); }catch(e){} }
+function lsDel(key){ try{ localStorage.removeItem(NS+key); }catch(e){} }
+
+function getDB(){ return lsGet("db", []); }
+function saveDB(db){ lsSet("db", db); }
+function getFeedbackDB(){ return lsGet("feedbackDb", []); }
+function saveFeedbackDB(db){ lsSet("feedbackDb", db); }
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+/* ======================= APP STATE ======================= */
+let state = {
+  participant: lsGet("participant", null),
+  tutStep: 0,
+  qualifySelected: null,
+  taskSelected: null,
+};
+
+/* ======================= NAV / SCREEN SWITCHING ======================= */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  const nav = document.getElementById("navbar");
+  if(id === "screen-landing"){ nav.classList.remove("show"); }
+  else { nav.classList.add("show"); }
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+  const map = {"screen-home":"home","screen-task":"classify","screen-tutorial":"classify","screen-qualify":"classify","screen-about":"about","screen-feedback":"feedback","screen-data":"data"};
+  const key = map[id];
+  if(key){ const btn = document.querySelector('.nav-btn[data-nav="'+key+'"]'); if(btn) btn.classList.add("active"); }
+  window.scrollTo({top:0,behavior:"instant"});
+}
+
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const target = btn.dataset.nav;
+    if(target === "home") renderHome();
+    else if(target === "classify") resumeOrStartClassify();
+    else if(target === "about") show("screen-about");
+    else if(target === "feedback") show("screen-feedback");
+    else if(target === "data") renderDataView();
+  });
+});
+
+/* ======================= LANDING ======================= */
+const envelope = document.getElementById("envelope");
+envelope.addEventListener("click", ()=>{
+  envelope.classList.add("open");
+  document.getElementById("envelope-hint").style.display = "none";
+  setTimeout(()=>{ document.getElementById("letter").classList.add("show"); }, 350);
+});
+document.getElementById("continue-btn").addEventListener("click", ()=> renderHome());
+
+/* ======================= HOME ======================= */
+function renderHome(){
+  const slot = document.getElementById("resume-banner-slot");
+  slot.innerHTML = "";
+  if(state.participant){
+    const progress = lsGet("progress_"+state.participant.id, 0);
+    if(progress > 0 && progress < 5){
+      const banner = document.createElement("div");
+      banner.className = "resume-banner";
+      banner.innerHTML = `<span>You have an unfinished session as <b>${escapeHtml(state.participant.id)}</b> (${progress}/5 done).</span>`;
+      const btn = document.createElement("button");
+      btn.className = "btn btn-primary btn-small";
+      btn.textContent = "Resume →";
+      btn.addEventListener("click", ()=>{ renderTaskScreen(); });
+      banner.appendChild(btn);
+      slot.appendChild(banner);
+    }
+  }
+  show("screen-home");
+}
+document.getElementById("start-classify-btn").addEventListener("click", ()=> resumeOrStartClassify());
+
+function resumeOrStartClassify(){
+  if(state.participant){
+    const progress = lsGet("progress_"+state.participant.id, 0);
+    if(progress >= 5){
+      // already finished — show results again
+      renderThanksScreen();
+      return;
+    }
+    if(progress > 0){ renderTaskScreen(); return; }
+    // has id but never started tutorial/qualified this session -> send to tutorial start
+    state.tutStep = 0;
+    renderTutorialStep();
+    show("screen-tutorial");
+    return;
+  }
+  show("screen-id");
+}
+
+document.getElementById("id-continue-btn").addEventListener("click", ()=>{
+  let val = document.getElementById("participant-input").value.trim();
+  if(!val){ val = "annotator_" + Math.random().toString(36).slice(2,7); }
+  state.participant = {id: val, createdAt: new Date().toISOString()};
+  lsSet("participant", state.participant);
+  if(!lsGet("assignment_"+val, null)){
+    const picks = shuffle(TWEETS).slice(0,5).map(t=>t.id);
+    lsSet("assignment_"+val, picks);
+    lsSet("progress_"+val, 0);
+  }
+  state.tutStep = 0;
+  renderTutorialStep();
+  show("screen-tutorial");
+});
+
+/* ======================= TUTORIAL ======================= */
+const TUT_STEPS = [
+  ()=>`<h2>You're in!</h2>
+    <p>Thank you for starting. You'll be labeling tweets with the emotion you think the writer is trying to express, one of: <b>anger, fear, joy, love, sadness,</b> and <b>surprise</b>.</p>
+    <p>First, we'll define the emotions and the task. Then we'll show you how to use the tool. Then you're off to annotating!</p>`,
+  ()=>`<h2>The task</h2>
+    <p>The task is simple: you'll be shown a tweet and asked which emotion is <b>most</b> being expressed. The options are anger, fear, joy, love, sadness, and surprise — plus two special options for tricky cases, which we'll cover shortly.</p>`,
+  ()=>`<h2>The six emotions</h2>
+    <p>Here's exactly what we mean by each one:</p>
+    <div class="def-grid">${CAT_ORDER.map(c=>{
+      const d = CATS[c];
+      return `<div class="def-card"><div class="def-emoji">${d.emoji}</div><div class="def-name">${d.label}</div><div class="def-text">${d.def}</div></div>`;
+    }).join("")}</div>`,
+  ()=>`<h2>When more than one emotion fits</h2>
+    <p>Often, multiple emotions may be expressed at once. For example:</p>
+    <div class="example-box">
+      <div class="example-label">Example</div>
+      <div class="tweet-text" style="font-size:16px;">"${TUT_MULTI.text}"</div>
+      <div class="example-tags">${TUT_MULTI.cats.map(c=>`<span class="pill" style="background:${CATS[c].color}">${CATS[c].emoji} ${CATS[c].label}</span>`).join("")}</div>
+    </div>
+    <p>The key is to mark the <b>one</b> emotion that is most prominent (here, most annotators would pick Love, since the surprise is really in service of an expression of love). If you truly cannot choose between two, select <b>"Cannot choose"</b>.</p>`,
+  ()=>`<h2>When no emotion fits</h2>
+    <p>Sometimes, none of the six emotions are relevant. For example:</p>
+    <div class="example-box">
+      <div class="example-label">Example</div>
+      <div class="tweet-text" style="font-size:16px;">"${TUT_NONE.text}"</div>
+      <div class="example-tags"><span class="pill" style="background:#8890ac;">No clear emotion</span></div>
+    </div>
+    <p>If that's the case, please select <b>"No emotion"</b> rather than guessing.</p>`,
+  ()=>`<h2>Narrower emotions</h2>
+    <p>Real emotions can be far more specific than just six words. We're sticking to these six main categories. If you feel a more specific emotion is expressed (say, "jealousy" or "awe"), please defer to its closest match on the emotion wheel below. You'll have access to this wheel at all times during the task by hitting the "Emotion Wheel" button.</p>
+    <div class="wheel-wrap"><div class="wheel"></div></div>`,
+  ()=>`<h2>One more thing</h2>
+    <p>At any point during the task, you can hit <b>"Save &amp; Quit"</b> to save your progress and come back later — your existing labels are never lost.</p>
+    <p>Ready? Hit "Next" to try a quick practice tweet, then you're on to the real thing!</p>`,
+];
+
+function renderTutorialStep(){
+  const body = document.getElementById("tut-body");
+  body.innerHTML = TUT_STEPS[state.tutStep]();
+  buildWheelLabels();
+  const dotsWrap = document.getElementById("tut-progress");
+  dotsWrap.innerHTML = TUT_STEPS.map((_,i)=>{
+    const cls = i < state.tutStep ? "done" : (i === state.tutStep ? "now" : "");
+    return `<div class="tut-dot ${cls}"></div>`;
+  }).join("");
+  document.getElementById("tut-back-btn").disabled = state.tutStep === 0;
+  document.getElementById("tut-next-btn").textContent = state.tutStep === TUT_STEPS.length-1 ? "Try a practice tweet →" : "Next →";
+}
+document.getElementById("tut-back-btn").addEventListener("click", ()=>{
+  if(state.tutStep > 0){ state.tutStep--; renderTutorialStep(); }
+});
+document.getElementById("tut-next-btn").addEventListener("click", ()=>{
+  if(state.tutStep < TUT_STEPS.length-1){ state.tutStep++; renderTutorialStep(); }
+  else { renderQualifyScreen(); show("screen-qualify"); }
+});
+
+/* ======================= OPTION BUTTON BUILDER (shared) ======================= */
+function buildOptionGrid(container, onPick){
+  container.innerHTML = "";
+  CAT_ORDER.forEach(c=>{
+    const d = CATS[c];
+    const btn = document.createElement("button");
+    btn.className = "opt-btn";
+    btn.dataset.cat = c;
+    btn.innerHTML = `<span class="opt-emoji">${d.emoji}</span><span>${d.label}</span>`;
+    btn.style.setProperty("--hover-color", d.color);
+    btn.addEventListener("click", ()=> onPick(c, btn));
+    container.appendChild(btn);
+  });
+}
+function buildSpecialRow(container, onPick){
+  container.innerHTML = "";
+  [["cannot","🤔 Cannot choose"],["none","🚫 No emotion"]].forEach(([key,label])=>{
+    const btn = document.createElement("button");
+    btn.className = "opt-btn";
+    btn.dataset.special = key;
+    btn.textContent = label;
+    btn.addEventListener("click", ()=> onPick(key, btn));
+    container.appendChild(btn);
+  });
+}
+function clearSelection(container){
+  container.querySelectorAll(".opt-btn").forEach(b=>b.classList.remove("selected"));
+}
+
+/* ======================= QUALIFY ======================= */
+function renderQualifyScreen(){
+  document.getElementById("qualify-text").textContent = `"${QUALIFY_TWEET.text}"`;
+  document.getElementById("qualify-feedback").innerHTML = "";
+  document.getElementById("qualify-start-btn").style.display = "none";
+  state.qualifySelected = null;
+
+  const optWrap = document.getElementById("qualify-options");
+  const specialWrap = document.getElementById("qualify-special");
+  buildOptionGrid(optWrap, (cat, btn)=>{
+    clearSelection(optWrap); clearSelection(specialWrap);
+    btn.classList.add("selected");
+    handleQualifyPick(cat);
+  });
+  buildSpecialRow(specialWrap, (key, btn)=>{
+    clearSelection(optWrap); clearSelection(specialWrap);
+    btn.classList.add("selected");
+    handleQualifyPick(key);
+  });
+}
+function handleQualifyPick(picked){
+  const fb = document.getElementById("qualify-feedback");
+  const correct = picked === QUALIFY_TWEET.cat;
+  if(correct){
+    fb.innerHTML = `<div class="feedback-panel correct">✅ <b>Correct!</b> "Grouchy" describes irritability and short-temperedness — a form of Anger.</div>`;
+  } else {
+    fb.innerHTML = `<div class="feedback-panel incorrect">❌ <b>Not quite.</b> This tweet describes feeling "grouchy," which is a form of <b>Anger</b> (irritability/annoyance). Remember: pick whichever emotion is most prominent, and use "Cannot choose" only when you're genuinely torn.</div>`;
+  }
+  document.getElementById("qualify-start-btn").style.display = "inline-flex";
+}
+document.getElementById("qualify-start-btn").addEventListener("click", ()=>{
+  renderTaskScreen();
+});
+
+/* ======================= TASK ======================= */
+function currentAssignment(){
+  return lsGet("assignment_"+state.participant.id, []);
+}
+function currentProgress(){
+  return lsGet("progress_"+state.participant.id, 0);
+}
+function renderTaskScreen(){
+  const assignment = currentAssignment();
+  const idx = currentProgress();
+  if(idx >= 5){ renderThanksScreen(); return; }
+  const tweetId = assignment[idx];
+  const tweet = TWEETS.find(t=>t.id===tweetId);
+  document.getElementById("task-tweet-text").textContent = `"${tweet.text}"`;
+  document.getElementById("task-progress-label").textContent = `Tweet ${idx+1} of 5`;
+  document.getElementById("task-progress-fill").style.width = ((idx)/5*100)+"%";
+  state.taskSelected = null;
+  document.getElementById("task-next-btn").disabled = true;
+
+  const optWrap = document.getElementById("task-options");
+  const specialWrap = document.getElementById("task-special");
+  buildOptionGrid(optWrap, (cat, btn)=>{
+    clearSelection(optWrap); clearSelection(specialWrap);
+    btn.classList.add("selected");
+    state.taskSelected = {type:"cat", value:cat};
+    document.getElementById("task-next-btn").disabled = false;
+  });
+  buildSpecialRow(specialWrap, (key, btn)=>{
+    clearSelection(optWrap); clearSelection(specialWrap);
+    btn.classList.add("selected");
+    state.taskSelected = {type:"special", value:key};
+    document.getElementById("task-next-btn").disabled = false;
+  });
+  show("screen-task");
+}
+
+document.getElementById("task-next-btn").addEventListener("click", ()=>{
+  if(!state.taskSelected) return;
+  const assignment = currentAssignment();
+  const idx = currentProgress();
+  const tweetId = assignment[idx];
+  const tweet = TWEETS.find(t=>t.id===tweetId);
+
+  const record = {
+    participant: state.participant.id,
+    tweetId: tweet.id,
+    tweetText: tweet.text,
+    datasetLabel: tweet.cat,
+    chosenLabel: state.taskSelected.type === "cat" ? state.taskSelected.value : null,
+    special: state.taskSelected.type === "special" ? state.taskSelected.value : null,
+    timestamp: new Date().toISOString(),
+  };
+  const db = getDB();
+  db.push(record);
+  saveDB(db);
+
+  const newProgress = idx + 1;
+  lsSet("progress_"+state.participant.id, newProgress);
+
+  if(newProgress >= 5){ renderThanksScreen(); }
+  else { renderTaskScreen(); }
+});
+
+document.getElementById("save-quit-btn").addEventListener("click", ()=>{
+  renderHome();
+});
+document.getElementById("exit-btn").addEventListener("click", ()=>{
+  if(confirm("Exit the task? Anything you've already submitted is saved — only the tweet you're on right now won't count.")){
+    renderHome();
+  }
+});
+document.getElementById("wheel-btn").addEventListener("click", ()=>{
+  document.getElementById("wheel-modal").style.display = "flex";
+});
+document.getElementById("wheel-close-btn").addEventListener("click", ()=>{
+  document.getElementById("wheel-modal").style.display = "none";
+});
+
+/* build wheel labels once */
+function buildWheelLabels(){
+  document.querySelectorAll(".wheel").forEach(wheel=>{
+    if(wheel.dataset.built) return;
+    wheel.dataset.built = "1";
+    const angles = [30,90,150,210,270,330]; // center of each 60deg segment
+    CAT_ORDER.forEach((c,i)=>{
+      const label = document.createElement("div");
+      label.className = "wheel-label";
+      label.textContent = CATS[c].emoji + " " + CATS[c].label;
+      const rad = (angles[i]-90) * Math.PI/180;
+      const r = 78;
+      const x = Math.cos(rad)*r;
+      const y = Math.sin(rad)*r;
+      label.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+      wheel.appendChild(label);
+    });
+  });
+}
+
+/* ======================= THANK YOU ======================= */
+function renderThanksScreen(){
+  const db = getDB().filter(r=>r.participant === state.participant.id);
+  const last5 = db.slice(-5);
+  const tbody = document.querySelector("#thanks-table tbody");
+  tbody.innerHTML = last5.map((r,i)=>{
+    const labelDisplay = r.chosenLabel ? (CATS[r.chosenLabel].emoji+" "+CATS[r.chosenLabel].label) : (r.special === "cannot" ? "🤔 Cannot choose" : "🚫 No emotion");
+    return `<tr><td>${i+1}</td><td>${escapeHtml(r.tweetText)}</td><td>${labelDisplay}</td></tr>`;
+  }).join("");
+  show("screen-thanks");
+}
+document.getElementById("thanks-home-btn").addEventListener("click", ()=> renderHome());
+document.getElementById("thanks-download-btn").addEventListener("click", ()=>{
+  const db = getDB().filter(r=>r.participant === state.participant.id);
+  downloadCSV(db, "my-emotion-labels.csv");
+});
+
+/* ======================= FEEDBACK ======================= */
+document.getElementById("feedback-submit-btn").addEventListener("click", ()=>{
+  const text = document.getElementById("feedback-text").value.trim();
+  if(!text) return;
+  const db = getFeedbackDB();
+  db.push({participant: state.participant ? state.participant.id : "anonymous", text, timestamp: new Date().toISOString()});
+  saveFeedbackDB(db);
+  document.getElementById("feedback-text").value = "";
+  document.getElementById("feedback-confirm").textContent = "Thanks — your feedback was recorded.";
+});
+
+/* ======================= DATA VIEW ======================= */
+function renderDataView(){
+  const db = getDB();
+  const participants = new Set(db.map(r=>r.participant));
+  const stats = document.getElementById("data-stats");
+  stats.innerHTML = `
+    <div class="stat"><b>${db.length}</b><span>total labels</span></div>
+    <div class="stat"><b>${participants.size}</b><span>participants</span></div>
+    <div class="stat"><b>${new Set(db.map(r=>r.tweetId)).size}</b><span>unique tweets seen</span></div>
+  `;
+  const tbody = document.querySelector("#data-table tbody");
+  tbody.innerHTML = db.slice().reverse().map(r=>{
+    const labelDisplay = r.chosenLabel ? (CATS[r.chosenLabel].emoji+" "+CATS[r.chosenLabel].label) : (r.special === "cannot" ? "Cannot choose" : "No emotion");
+    return `<tr><td>${escapeHtml(r.participant)}</td><td>${r.tweetId}</td><td>${escapeHtml(r.tweetText)}</td><td>${labelDisplay}</td><td>${new Date(r.timestamp).toLocaleString()}</td></tr>`;
+  }).join("");
+  show("screen-data");
+}
+document.getElementById("export-csv-btn").addEventListener("click", ()=> downloadCSV(getDB(), "emotion-labels-all.csv"));
+document.getElementById("export-json-btn").addEventListener("click", ()=>{
+  downloadBlob(JSON.stringify(getDB(), null, 2), "emotion-labels-all.json", "application/json");
+});
+document.getElementById("clear-data-btn").addEventListener("click", ()=>{
+  if(confirm("This deletes all collected labels in this browser. Continue?")){
+    saveDB([]);
+    renderDataView();
+  }
+});
+
+/* ======================= UTIL ======================= */
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[s]));
+}
+function downloadCSV(records, filename){
+  if(records.length === 0){ downloadBlob("no data yet", filename, "text/csv"); return; }
+  const cols = Object.keys(records[0]);
+  const rows = [cols.join(",")].concat(records.map(r=>cols.map(c=>{
+    let v = r[c] === null || r[c] === undefined ? "" : String(r[c]);
+    if(v.includes(",") || v.includes('"') || v.includes("\n")){ v = '"'+v.replace(/"/g,'""')+'"'; }
+    return v;
+  }).join(",")));
+  downloadBlob(rows.join("\n"), filename, "text/csv");
+}
+function downloadBlob(content, filename, mime){
+  const blob = new Blob([content], {type:mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ======================= INIT ======================= */
+buildWheelLabels();
+show("screen-landing");
+</script>
+</body>
+</html>
