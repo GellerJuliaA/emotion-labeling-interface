@@ -529,7 +529,7 @@ var COPY = {
   },
 
   idScreen: {
-    heading: "Before we start",
+    heading: "Enter your name",
     body: "Enter your name so we can track the tweets you've labeled. This can be your real name or a username.",
     label: "Your name or username",
     placeholder: "e.g. annotator_07",
@@ -543,35 +543,34 @@ var COPY = {
     lastStepBtn: "Try a practice tweet →",
     exampleLabel: "Example",
     steps: [
-      { heading: "You're in!", paragraphs: [
-          "ou'll be annotating tweets with the one emotion you think the writer is <em>most</em> expressing> your choices for emotions are:: <b>anger, fear, joy, love, sadness,</b> and <b>surprise</b>.",
-          "First, we'll define each emotion more clearly and the task at hand. Next, we'll show you how to use the tool. Then you'll be ready to start.",
+      { heading: "Goal", paragraphs: [
+          "You'll be annotating tweets with the one emotion you think the writer is <em>most</em> expressing. Your choices for emotions are:: <b>anger, fear, joy, love, sadness,</b> and <b>surprise</b>.",
       ]},
-      { heading: "The task", paragraphs: [
-          "You'll be shown a tweet and asked which emotion the writer is <b>most</b> expressing. As a reminder, the options are anger, fear, joy, love, sadness, and surprise. There will also be two additional options for special cases which we will discuss soon.",
+      { heading: "Task", paragraphs: [
+          "You'll be shown a tweet and asked which emotion the writer is <b>most</b> expressing. As a reminder, the options are <b>anger, fear, joy, love, sadness,</b> and <b>surprise</b>. There will also be two more options for special cases which we'll go over soon.",
       ]},
-      { heading: "The six emotions", intro: "Here's exactly how we define each emotion:" },
-      { heading: "When more than one emotion fits",
-        intro: "You might come across a tweet where multiple emotions are being expressed at once. For example:",
+      { heading: "Defining Emotions", intro: "This is how each emotion is defined." },
+      { heading: "Special Case: cannot choose",
+        intro: "You might see a tweet where multiple emotions are expressed at once. For example:",
         exampleText: "omg i cannot believe you flew all threw me a surprise birthday part. i love you so much",
         exampleCats: ["love","surprise"],
         outro: "The key is to mark the <b>one</b> emotion that you think the writer is showing. In this case, Love would be selected because the surprise is really just in detail in the writer expressing their love for someone. If you really can't choose between multiple emotions, select <b>\"Cannot choose\"</b>.",
       },
-      { heading: "When no emotions fit",
-        intro: "Another tricky situation you may come across is when you don't see any of the emotions being expressed. For example:",
+      { heading: "Special Case: no emotion",
+        intro: "Another tricky situation you might see is when you don't see any of the emotions expressed.",
         exampleText: "the office party will take place the week before Christmas",
         noEmotionTag: "No clear emotion",
-        outro: "In this case, please select <b>\"No emotion\"</b> rather than guessing or choosing at random.",
+        outro: "It is unclear what emotion the writer feels in the statement. Maybe they are excited and feeling joy or dislike after-hours events and feel anger about the party. In this case, please select <b>\"No emotion\"</b> rather than guessing or choosing at random.",
       },
-      { heading: "Narrower emotions", paragraphs: [
-          "In reality, there are a wide array of emotions that can be far more varied and nuanced than these six. We're using just htese six emotions. If you think there is a more specific or a different emotion being expressed, you may use the emotion wheel to see how it relates to the main six emotions. Start at a the emotion you suspect and trace the emotions inward to find which of the six it falls under. For example, \"jealousy\" falls under Angry \"awe\" is under Surprised.",
+      { heading: "Emotion Wheel", paragraphs: [
+          "In reality, there are a wide array of emotions people may have which are far more varied and nuanced than the six we chose. While we're justing using these six, you can use the emotion wheel to see which more of the six broader emotions is linked to the specific emotion. Start at a the specific emotion you suspect and trace the emotions in to find which of the six it falls under. For example, \"jealousy\" falls under anger and \"awe\" is under surprise.",
           "You'll have access to this wheel that you can refer to at any point by hitting the \"Emotion Wheel\" button.",
         ],
-        previewBtn: "🎨 Preview the Feelings Wheel",
+        previewBtn: "🎨 See the Emotion Wheel",
       },
-      { heading: "One more thing", paragraphs: [
-          "At any point during the task, you can hit <b>\"Save &amp; Quit\"</b> to save your progress and come back later.",
-          "Ready? Hit \"Next\" to try a quick practice tweet and then start annotating.",
+      { heading: "Notes", paragraphs: [
+          "At any point, you can hit <b>\"Save &amp; Quit\"</b> to save your progress and come back later.",
+          "Ready? Hit \"Next\" to do one practice tweet and then you can start annotating.",
       ]},
     ],
   },
@@ -645,7 +644,7 @@ var COPY = {
   },
 
   wheelModal: {
-    title: "The Feelings Wheel",
+    title: "The Emotion Wheel",
     body: "Our task only uses <b>anger, fear, joy, love, sadness</b> and <b>surprise</b>. For anything else, look at the emotion and trace it in to one of the six emotions we use or select \"Cannot choose\"/\"No emotion.\"",
   },
 };
@@ -964,7 +963,7 @@ document.getElementById("tut-next-btn").addEventListener("click", ()=>{
   if(state.tutStep < TUT_STEPS.length-1){ state.tutStep++; renderTutorialStep(); }
   else { renderQualifyScreen(); show("screen-qualify"); }
 });
-// The "Preview the Feelings Wheel" button only exists on one tutorial step,
+// The "Preview the Emotion Wheel" button only exists on one tutorial step,
 // and that step's HTML gets replaced every time renderTutorialStep() runs —
 // so this listens on the stable #tut-body container instead of the button
 // itself, which would otherwise need re-attaching on every render.
@@ -1147,8 +1146,8 @@ document.addEventListener("keydown", (e)=>{
   }
 });
 
-/* ---- The full Feelings Wheel (7 core emotions -> ~41 second-tier ->
-   ~82 third-tier words), transcribed from the classic 3-ring Feelings
+/* ---- The full Emotion Wheel (7 core emotions -> ~41 second-tier ->
+   ~82 third-tier words), transcribed from the classic 3-ring Emotion
    Wheel diagram. Core wedges are NOT equal width — each is sized by how
    many second-tier children it has, same as the source diagram, so
    e.g. Happy (9 children) is much wider than Bad (4 children). Five of
