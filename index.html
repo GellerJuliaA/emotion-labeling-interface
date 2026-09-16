@@ -557,9 +557,29 @@ const TUT_NONE = {text:"the city council meeting has been rescheduled to 3pm on 
 
 /* ======================= STORAGE HELPERS ======================= */
 const NS = "emoLab_";
-function lsGet(key, fallback){ try{ const v = localStorage.getItem(NS+key); return v ? JSON.parse(v) : fallback; }catch(e){ return fallback; } }
-function lsSet(key, val){ try{ localStorage.setItem(NS+key, JSON.stringify(val)); }catch(e){} }
-function lsDel(key){ try{ localStorage.removeItem(NS+key); }catch(e){} }
+// Every read/write goes through an in-memory mirror first. This means that if
+// real localStorage is unavailable or throws (locked-down browser, private
+// mode, quota exceeded, etc.), the app still behaves correctly for the
+// current session — it just won't persist across a reload. Without this,
+// a write that silently fails followed by a read that falls back to an
+// empty default can send screens like the task view into an infinite
+// "data looks invalid -> regenerate -> still looks invalid" loop.
+const memoryFallback = {};
+function lsGet(key, fallback){
+  if(Object.prototype.hasOwnProperty.call(memoryFallback, key)) return memoryFallback[key];
+  try{
+    const v = localStorage.getItem(NS+key);
+    return v !== null ? JSON.parse(v) : fallback;
+  }catch(e){ return fallback; }
+}
+function lsSet(key, val){
+  memoryFallback[key] = val;
+  try{ localStorage.setItem(NS+key, JSON.stringify(val)); }catch(e){}
+}
+function lsDel(key){
+  delete memoryFallback[key];
+  try{ localStorage.removeItem(NS+key); }catch(e){}
+}
 
 function getDB(){ return lsGet("db", []); }
 function saveDB(db){ lsSet("db", db); }
@@ -685,7 +705,7 @@ function resumeOrStartClassify(){
 }
 
 document.getElementById("id-continue-btn").addEventListener("click", ()=>{
-  let val = document.getElementById("participant-input").value.trim();
+  let val = document.getElementById("participant-input").value.trim().slice(0, 60);
   if(!val){ val = "annotator_" + Math.random().toString(36).slice(2,7); }
   state.participant = {id: val, createdAt: new Date().toISOString()};
   lsSet("participant", state.participant);
@@ -822,14 +842,37 @@ function currentAssignment(){
   return lsGet("assignment_"+state.participant.id, []);
 }
 function currentProgress(){
-  return lsGet("progress_"+state.participant.id, 0);
+  const raw = lsGet("progress_"+state.participant.id, 0);
+  const n = Number(raw);
+  return Number.isInteger(n) && n >= 0 ? n : 0;
 }
-function renderTaskScreen(){
-  const assignment = currentAssignment();
-  const idx = currentProgress();
+function renderTaskScreen(_retried){
+  const id = state.participant.id;
+  let assignment = currentAssignment();
+  let idx = currentProgress();
+
+  // Defensive recovery: if the stored assignment is malformed (wrong length,
+  // duplicate/blank ids, or references a tweet id that no longer exists —
+  // e.g. stale localStorage from an older version of the dataset), or the
+  // progress index is out of range, start a clean batch rather than crashing.
+  const validIds = new Set(TWEETS.map(t=>t.id));
+  const assignmentLooksValid = Array.isArray(assignment) && assignment.length === 5 && assignment.every(a=>validIds.has(a));
+  if(!assignmentLooksValid || idx > 5){
+    if(_retried){ console.error("Could not recover a valid assignment; showing home."); renderHome(); return; }
+    assignNewBatch(id);
+    renderTaskScreen(true);
+    return;
+  }
   if(idx >= 5){ renderThanksScreen(); return; }
+
   const tweetId = assignment[idx];
   const tweet = TWEETS.find(t=>t.id===tweetId);
+  if(!tweet){
+    if(_retried){ console.error("Could not recover a valid tweet; showing home."); renderHome(); return; }
+    assignNewBatch(id);
+    renderTaskScreen(true);
+    return;
+  }
   document.getElementById("task-tweet-text").textContent = `"${tweet.text}"`;
   document.getElementById("task-progress-label").textContent = `Tweet ${idx+1} of 5`;
   document.getElementById("task-progress-fill").style.width = ((idx)/5*100)+"%";
@@ -893,6 +936,14 @@ document.getElementById("wheel-btn").addEventListener("click", ()=>{
 });
 document.getElementById("wheel-close-btn").addEventListener("click", ()=>{
   document.getElementById("wheel-modal").style.display = "none";
+});
+document.getElementById("wheel-modal").addEventListener("click", (e)=>{
+  if(e.target.id === "wheel-modal"){ document.getElementById("wheel-modal").style.display = "none"; }
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape" && document.getElementById("wheel-modal").style.display === "flex"){
+    document.getElementById("wheel-modal").style.display = "none";
+  }
 });
 
 /* ---- Real subdivided emotion wheel: inner ring = 6 primary emotions,
