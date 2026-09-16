@@ -90,9 +90,16 @@ button{font-family:inherit; cursor:pointer;}
     radial-gradient(1px 1px at 20% 90%, #fff, transparent),
     radial-gradient(1.5px 1.5px at 70% 50%, #fff, transparent),
     linear-gradient(180deg, #0a1230 0%, #16225a 60%, #1c2c6b 100%);
-  display:flex; align-items:center; justify-content:center;
   text-align:center;
 }
+/* NOTE: display must live in this compound, .active-gated rule, not in the bare
+   #screen-landing rule above. #screen-landing is an ID selector, which beats the
+   .screen{display:none} class rule on specificity alone — so an unconditional
+   display:flex on the bare ID would keep this section visibly rendered (and
+   taking up a full viewport height in normal page flow) even after it's
+   deactivated, no matter what "active" class JS toggles. That was the actual
+   bug behind the landing screen (and the letter inside it) appearing "stuck". */
+#screen-landing.active{display:flex; align-items:center; justify-content:center;}
 .moon{
   position:absolute; top:60px; right:70px; width:70px; height:70px; border-radius:50%;
   background:#fbeecb; box-shadow:0 0 50px 10px rgba(251,238,203,0.35);
