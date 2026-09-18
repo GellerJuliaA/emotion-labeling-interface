@@ -667,7 +667,16 @@ const CAT_ORDER = ["anger","fear","joy","love","sadness","surprise"];
 
 // Curated from the dair-ai/emotion dataset (Hugging Face). Ground-truth label kept
 // for research reference only — it is never shown to the participant during labeling.
-const TWEETS = [
+//
+// TWEETS is loaded from tweets.json (same folder as this file) at startup —
+// see loadTweets() a few lines down. To change the dataset, just edit or
+// replace tweets.json; you don't need to touch this file at all. The array
+// below is kept only as a fallback so the app still works if that fetch
+// ever fails (e.g. this file opened directly as file:// with no local
+// server, or tweets.json missing/unreachable) — it's the exact same 57
+// tweets tweets.json ships with today.
+var TWEETS = [];
+var FALLBACK_TWEETS = [
   {id:"S1",text:"i didnt feel humiliated",cat:"sadness"},
   {id:"S2",text:"i can go from feeling so hopeless to so damned hopeful just from being around someone who cares and is awake",cat:"sadness"},
   {id:"S3",text:"ive been feeling a little burdened lately, wasnt sure why that was",cat:"sadness"},
@@ -726,6 +735,25 @@ const TWEETS = [
   {id:"U7",text:"i started feeling funny, and then friday i woke up sick as a dog",cat:"surprise"},
   {id:"U8",text:"her verses left me feeling curious to hear more of the odd couple's story",cat:"surprise"},
 ];
+// Fetches tweets.json and populates TWEETS; falls back to FALLBACK_TWEETS
+// (logging why) on any failure — missing file, bad JSON, wrong shape, or
+// running from file:// where fetch() of a local file is blocked by the
+// browser entirely. Either way the app always ends up with a usable list.
+async function loadTweets(){
+  try{
+    const res = await fetch("tweets.json");
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if(!Array.isArray(data) || data.length === 0) throw new Error("tweets.json did not contain a non-empty array");
+    if(!data.every(t => t && typeof t.id === "string" && typeof t.text === "string" && typeof t.cat === "string")){
+      throw new Error("tweets.json entries must each have string id/text/cat fields");
+    }
+    TWEETS = data;
+  }catch(e){
+    console.warn("Could not load tweets.json (" + e.message + ") — using the built-in fallback tweet list instead.");
+    TWEETS = FALLBACK_TWEETS;
+  }
+}
 
 const QUALIFY_TWEET = {id:"Q1", text:"i am feeling grouchy", cat:"anger"};
 
@@ -1464,9 +1492,12 @@ function applyStaticCopy(){
 }
 
 /* ======================= INIT ======================= */
-applyStaticCopy();
-document.getElementById("wheel-graphic").innerHTML = buildEmotionWheelSVG(780);
-show("screen-landing");
+(async function init(){
+  await loadTweets();
+  applyStaticCopy();
+  document.getElementById("wheel-graphic").innerHTML = buildEmotionWheelSVG(780);
+  show("screen-landing");
+})();
 </script>
 </body>
 </html>
