@@ -682,7 +682,7 @@ async function loadTweets(){
   if(!res.ok) throw new Error("HTTP " + res.status + " loading tweets.json");
   const data = await res.json();
   if(!Array.isArray(data) || data.length === 0) throw new Error("tweets.json did not contain a non-empty array");
-  if(!data.every(t => t && typeof t.id === "string" && typeof t.text === "string" && typeof t.cat === "string")){
+  if(!data.every(t => t && (typeof t.id === "string" || typeof t.id === "number") && typeof t.text === "string" && typeof t.cat === "string")){
     throw new Error("tweets.json entries must each have string id/text/cat fields");
   }
   TWEETS = data;
